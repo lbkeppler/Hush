@@ -58,9 +58,17 @@ public actor BoseDevice {
         try checkForError(r)
     }
 
-    // MARK: - Audio settings register `[31.10]` (cnc/autoCNC/spatial/wind/anc)
+    // MARK: - Audio settings register `[31.10]` (cnc/autoCNC/spatial/wind/anc), with a
+    // `[31.6]` ModeConfig fallback for devices (e.g. lonestarr / QC Ultra gen-1) that
+    // return FuncNotSupp for `[31.10]` — same situation as bosectl's prince/qc45 devices
+    // (`~/bosectl/python/pybmap/connection.py` `_update_current_mode_config`).
 
     public func audioSettings() async throws -> AudioSettings {
+        guard profile.hasAudioSettingsRegister else {
+            let config = try await currentModeConfig()
+            return AudioSettings(cnc: config.cnc, autoCNC: config.autoCNC, spatial: config.spatial,
+                                  wind: config.wind, anc: config.anc)
+        }
         let r = try await sender.send(BMAPBuild.get(Addr.audioSettings), drain: false, timeout: 3)
         return BMAPParse.audioSettings(try first(r, Addr.audioSettings).payload)
     }
@@ -70,9 +78,37 @@ public actor BoseDevice {
         try checkForError(r)
     }
 
+    /// Fetches the `ModeConfig` for the currently active mode: `[31.3]` for the index,
+    /// then `[31.1]` GetAll (via `modes()`) to find that index's config — mirrors
+    /// bosectl's `_current_mode_config` (`mode_idx()` + a lookup in `modes()`), since
+    /// there is no targeted single-mode `[31.6]` GET.
+    private func currentModeConfig() async throws -> ModeConfig {
+        let idx = try await currentMode()
+        let all = try await modes()
+        guard let config = all.first(where: { $0.index == idx }) else { throw BMAPError.unexpectedResponse }
+        return config
+    }
+
+    /// Writes back a `ModeConfig` via `[31.6]` SETGET — the fallback write path used by
+    /// setCNC/setANC/setWind/setSpatial on devices without `[31.10]`. Unlike
+    /// `saveProfile`, this does not gate on `editableSlots`: CNC/ANC/Wind/Spatial are
+    /// live settings that apply to whichever mode is currently active (including
+    /// firmware presets), exactly as `[31.10]` does on devices that have it.
+    private func writeModeConfigFallback(_ config: ModeConfig) async throws {
+        let r = try await sender.send(BMAPBuild.modeConfig40(config), drain: false, timeout: 3)
+        try checkForError(r)
+    }
+
     /// CNC is inverted (0 = max ANC, 10 = ambient); writing it must clear `autoCNC`
     /// (leaving `autoCNC=1` set alongside an explicit level triggers Runtime err 8 — spec §8).
     public func setCNC(_ level: Int) async throws {
+        guard profile.hasAudioSettingsRegister else {
+            var config = try await currentModeConfig()
+            config.cnc = level
+            config.autoCNC = 0
+            try await writeModeConfigFallback(config)
+            return
+        }
         var s = try await audioSettings()
         s.cnc = level
         s.autoCNC = 0
@@ -80,12 +116,24 @@ public actor BoseDevice {
     }
 
     public func setANC(_ on: Bool) async throws {
+        guard profile.hasAudioSettingsRegister else {
+            var config = try await currentModeConfig()
+            config.anc = on ? 1 : 0
+            try await writeModeConfigFallback(config)
+            return
+        }
         var s = try await audioSettings()
         s.anc = on ? 1 : 0
         try await writeAudioSettings(s)
     }
 
     public func setWind(_ on: Bool) async throws {
+        guard profile.hasAudioSettingsRegister else {
+            var config = try await currentModeConfig()
+            config.wind = on ? 1 : 0
+            try await writeModeConfigFallback(config)
+            return
+        }
         var s = try await audioSettings()
         s.wind = on ? 1 : 0
         try await writeAudioSettings(s)
@@ -93,6 +141,12 @@ public actor BoseDevice {
 
     /// `mode`: 0 off / 1 room / 2 head (spec §4.3).
     public func setSpatial(_ mode: Int) async throws {
+        guard profile.hasAudioSettingsRegister else {
+            var config = try await currentModeConfig()
+            config.spatial = mode
+            try await writeModeConfigFallback(config)
+            return
+        }
         var s = try await audioSettings()
         s.spatial = mode
         try await writeAudioSettings(s)
@@ -135,6 +189,13 @@ public actor BoseDevice {
         return BMAPParse.multipointEnabled(try first(r, Addr.multipoint).payload)
     }
 
+    /// On lonestarr hardware (2026-09-09 verification), `setMultipoint(false)` ack'd
+    /// successfully but an immediate read-back still showed `true`. `BMAPBuild.toggle`
+    /// (plain `[on ? 1 : 0]`) and `BMAPParse.multipointEnabled` (bit `0x02` of byte 0)
+    /// match bosectl's `build_toggle`/`parse_multipoint` for `[1.10]` exactly — bosectl
+    /// does no extra delay or different payload either — so this isn't a payload bug.
+    /// Most likely the device applies multipoint asynchronously and a re-read shortly
+    /// after would show the new value. Not blocking; revisit if it recurs.
     public func setMultipoint(_ on: Bool) async throws {
         let r = try await sender.send(BMAPBuild.toggle(Addr.multipoint, on: on), drain: false, timeout: 3)
         try checkForError(r)

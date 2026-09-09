@@ -37,13 +37,14 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     #expect(DeviceProfile.wolverine.editableSlots == 4...10)
 }
 
-@Test func deviceProfileLonestarrStartsAsWolverineCopy() {
-    // Task 13: lonestarr starts identical to wolverine except identity fields;
-    // corrected during Milestone 0 hardware verification (Task 14).
+@Test func deviceProfileLonestarrValues() {
+    // Task 14 hardware verification: RFCOMM channel, ModeConfig lengths, and editable
+    // slots match wolverine. Task 15 / 2026-09-09 verification: gen-1 does NOT expose
+    // [31.10] (FuncNotSupp), unlike wolverine — this is the one deliberate divergence.
     #expect(DeviceProfile.lonestarr.productID == 0x4066)
     #expect(DeviceProfile.lonestarr.codename == "lonestarr")
     #expect(DeviceProfile.lonestarr.rfcommChannel == DeviceProfile.wolverine.rfcommChannel)
-    #expect(DeviceProfile.lonestarr.hasAudioSettingsRegister == DeviceProfile.wolverine.hasAudioSettingsRegister)
+    #expect(DeviceProfile.lonestarr.hasAudioSettingsRegister == false)
     #expect(DeviceProfile.lonestarr.modeConfigStatusLength == DeviceProfile.wolverine.modeConfigStatusLength)
     #expect(DeviceProfile.lonestarr.modeConfigSetLength == DeviceProfile.wolverine.modeConfigSetLength)
     #expect(DeviceProfile.lonestarr.editableSlots == DeviceProfile.wolverine.editableSlots)
@@ -208,6 +209,116 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     try await dev.setSpatial(2) // head
     let sent = await mock.sent
     #expect(sent.last?.payload == [0x05,0x00,0x02,0x00,0x01])
+}
+
+// MARK: - [31.6] ModeConfig fallback (lonestarr / no [31.10] — Task 15)
+
+/// Replies for the fallback sequence: `[31.3]` currentMode GET, then `[31.1]` GetAll
+/// (drained `[31.6]` STATUS frames), matching bosectl's `_current_mode_config`.
+private func fallbackReadReplies(currentIndex: Int, modes: [[UInt8]]) -> [[BMAPFrame]] {
+    [
+        [BMAPFrame(fblock: 0x1f, function: 0x03, op: .status, payload: [UInt8(currentIndex)])],
+        modes.map { BMAPFrame(fblock: 0x1f, function: 0x06, op: .status, payload: $0) },
+    ]
+}
+
+@Test func audioSettingsFallsBackToModeConfigWhenNoAudioSettingsRegister() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 3, autoCNC: 0, spatial: 2, wind: 1, anc: 1)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]))
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    let s = try await dev.audioSettings()
+    #expect(s == AudioSettings(cnc: 3, autoCNC: 0, spatial: 2, wind: 1, anc: 1))
+    let sent = await mock.sent
+    #expect(sent.map { $0.fblock } == [Addr.currentMode.0, Addr.modesList.0])
+    #expect(sent.map { $0.function } == [Addr.currentMode.1, Addr.modesList.1])
+    #expect(sent.map(\.op) == [.get, .start])
+    #expect(sent.allSatisfy { ($0.fblock, $0.function) != Addr.audioSettings }) // never touches [31.10]
+}
+
+@Test func setCNCUsesModeConfigFallbackWhenNoAudioSettingsRegister() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 0, autoCNC: 1, spatial: 0, wind: 0, anc: 1)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]) +
+                          [[BMAPFrame(fblock: 0x1f, function: 0x06, op: .result, payload: [])]])
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    try await dev.setCNC(5)
+    let sent = await mock.sent
+    #expect(sent.map { $0.fblock } == [Addr.currentMode.0, Addr.modesList.0, Addr.modeConfig.0])
+    #expect(sent.map { $0.function } == [Addr.currentMode.1, Addr.modesList.1, Addr.modeConfig.1])
+    #expect(sent.map(\.op) == [.get, .start, .setGet])
+    let p = sent.last!.payload
+    #expect(p[35] == 5)  // cnc = 5
+    #expect(p[36] == 0)  // autoCNC cleared
+    #expect(p[39] == 1)  // anc preserved
+}
+
+@Test func setANCUsesModeConfigFallbackWhenNoAudioSettingsRegister() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 5, autoCNC: 0, spatial: 1, wind: 0, anc: 0)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]) +
+                          [[BMAPFrame(fblock: 0x1f, function: 0x06, op: .result, payload: [])]])
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    try await dev.setANC(true)
+    let sent = await mock.sent
+    #expect(sent.map { $0.fblock } == [Addr.currentMode.0, Addr.modesList.0, Addr.modeConfig.0])
+    #expect(sent.map { $0.function } == [Addr.currentMode.1, Addr.modesList.1, Addr.modeConfig.1])
+    #expect(sent.map(\.op) == [.get, .start, .setGet])
+    let p = sent.last!.payload
+    #expect(p[35] == 5)  // cnc preserved
+    #expect(p[37] == 1)  // spatial preserved
+    #expect(p[39] == 1)  // anc turned on
+}
+
+@Test func setSpatialUsesModeConfigFallbackWhenNoAudioSettingsRegister() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 5, autoCNC: 0, spatial: 0, wind: 0, anc: 1)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]) +
+                          [[BMAPFrame(fblock: 0x1f, function: 0x06, op: .result, payload: [])]])
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    try await dev.setSpatial(2) // head
+    let sent = await mock.sent
+    #expect(sent.map { $0.fblock } == [Addr.currentMode.0, Addr.modesList.0, Addr.modeConfig.0])
+    #expect(sent.map { $0.function } == [Addr.currentMode.1, Addr.modesList.1, Addr.modeConfig.1])
+    #expect(sent.map(\.op) == [.get, .start, .setGet])
+    let p = sent.last!.payload
+    #expect(p[35] == 5)  // cnc preserved
+    #expect(p[37] == 2)  // spatial = head
+    #expect(p[39] == 1)  // anc preserved
+}
+
+@Test func setWindUsesModeConfigFallbackWhenNoAudioSettingsRegister() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 5, autoCNC: 0, spatial: 0, wind: 0, anc: 1)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]) +
+                          [[BMAPFrame(fblock: 0x1f, function: 0x06, op: .result, payload: [])]])
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    try await dev.setWind(true)
+    let sent = await mock.sent
+    let p = sent.last!.payload
+    #expect(p[35] == 5)  // cnc preserved
+    #expect(p[38] == 1)  // wind on
+    #expect(p[39] == 1)  // anc preserved
+}
+
+@Test func setCNCPropagatesDeviceErrorOnFallbackWrite() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 0, autoCNC: 1, spatial: 0, wind: 0, anc: 1)
+    await mock.setReplies(fallbackReadReplies(currentIndex: 0, modes: [quiet]) +
+                          [[BMAPFrame(fblock: 0x1f, function: 0x06, op: .error, payload: [0x04])]])
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    do {
+        try await dev.setCNC(5)
+        Issue.record("expected setCNC to throw on a device ERROR reply")
+    } catch let error as BMAPError {
+        #expect(error == .device(code: 4))
+    }
 }
 
 // MARK: - EQ
