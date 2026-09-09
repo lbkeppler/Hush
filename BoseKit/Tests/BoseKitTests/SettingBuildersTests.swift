@@ -20,3 +20,12 @@ import Testing
 @Test func buildsSidetoneMedium() {
     #expect(Array(BMAPBuild.setSidetone(level: 2).encoded) == [0x01,0x0b,0x02,0x02,0x01,0x02])
 }
+
+@Test func buildsListProfilesStart() {
+    #expect(Array(BMAPBuild.listProfiles().encoded) == [0x1f,0x01,0x05,0x00])
+}
+
+@Test func buildsSetButtonMapping() {
+    let f = BMAPBuild.setButton(ButtonMapping(button: 1, event: 2, action: 3))
+    #expect(Array(f.encoded) == [0x01,0x09,0x02,0x03,0x01,0x02,0x03])
+}

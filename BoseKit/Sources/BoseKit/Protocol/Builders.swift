@@ -35,4 +35,13 @@ public extension BMAPBuild {
         BMAPFrame(fblock: Addr.voicePrompts.0, function: Addr.voicePrompts.1, op: .setGet,
                   payload: [(enabled ? 0x20 : 0) | (UInt8(language) & 0x1F)])
     }
+    static func setButton(_ m: ButtonMapping) -> BMAPFrame {
+        BMAPFrame(fblock: Addr.buttons.0, function: Addr.buttons.1, op: .setGet,
+                  payload: [UInt8(m.button), UInt8(m.event), UInt8(m.action)])
+    }
+    /// `START [31.1]` — "list profiles"; the device streams `[31.6]` STATUS frames for
+    /// every mode (presets + custom slots), collected by `send(..., drain: true)`.
+    static func listProfiles() -> BMAPFrame {
+        BMAPFrame(fblock: Addr.modesList.0, function: Addr.modesList.1, op: .start)
+    }
 }
