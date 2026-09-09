@@ -29,12 +29,15 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
             self.lock.lock(); self.openStatus = rc; self.opened = (rc == kIOReturnSuccess); self.channel = ch; self.lock.unlock()
             completion(rc)
             // Keep pumping so delegate callbacks are delivered for the life of the connection.
-            while let th = self.thread, !th.isCancelled {
+            while true {
+                self.lock.lock(); let th = self.thread; self.lock.unlock()
+                guard let th, !th.isCancelled else { break }
                 rl.run(mode: .default, before: Date().addingTimeInterval(0.2))
             }
         }
         t.name = "BoseKit.RFCOMM"; t.stackSize = 1 << 20
-        self.thread = t; t.start()
+        lock.lock(); self.thread = t; lock.unlock()
+        t.start()
     }
 
     // Delegate callbacks run on the dedicated thread, in order → append synchronously under the lock.
@@ -54,5 +57,10 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
         var bytes = [UInt8](data)
         return ch.writeSync(&bytes, length: UInt16(bytes.count))
     }
-    func stop() { thread?.cancel(); thread = nil }
+    func stop() {
+        lock.lock()
+        thread?.cancel()
+        thread = nil
+        lock.unlock()
+    }
 }
