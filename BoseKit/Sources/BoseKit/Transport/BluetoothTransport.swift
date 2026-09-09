@@ -5,6 +5,7 @@ public actor BluetoothTransport {
     private let address: String
     private let channelID: BluetoothRFCOMMChannelID
     private var core: TransportCore?
+    private var reconnectTask: Task<Void, Error>?
 
     public init(address: String, channel: UInt8) { self.address = address; self.channelID = channel }
 
@@ -27,11 +28,25 @@ public actor BluetoothTransport {
     }
 
     /// Re-establishes the RFCOMM channel if it isn't currently open.
+    ///
+    /// Concurrent callers (e.g. two overlapping `send()`s after the channel drops)
+    /// coalesce onto a single in-flight reconnect attempt instead of each racing their
+    /// own disconnect()/connect() pair — a race would let a second `connect()` overwrite
+    /// `core` while the first `TransportCore`'s run-loop thread is still alive, leaking it.
     public func ensureConnected() async throws {
-        guard !isConnected else { return }
-        disconnect()
-        try await Task.sleep(nanoseconds: 300_000_000) // short backoff before reconnect
-        try await connect()
+        if isConnected { return }
+        if let existing = reconnectTask {
+            try await existing.value
+            return
+        }
+        let task = Task<Void, Error> { [self] in
+            disconnect() // stop/nil any old core (no-op if none)
+            try await Task.sleep(nanoseconds: 300_000_000) // backoff only on reconnect
+            try await connect()
+        }
+        reconnectTask = task
+        defer { reconnectTask = nil }
+        try await task.value
     }
 
     public func rawSend(_ data: Data) throws {
