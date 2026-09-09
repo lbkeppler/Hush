@@ -23,4 +23,24 @@ public actor BluetoothTransport {
         guard let core else { throw BMAPError.notConnected }
         guard core.write(data) == kIOReturnSuccess else { throw BMAPError.notConnected }
     }
+
+    public func send(_ frame: BMAPFrame, drain: Bool = false, timeout: TimeInterval = 3) async throws -> [BMAPFrame] {
+        guard let core else { throw BMAPError.notConnected }
+        core.clearInbound()
+        try rawSend(frame.encoded)
+        try await Task.sleep(nanoseconds: 200_000_000) // required post-send delay
+        let deadline = Date().addingTimeInterval(timeout)
+        while core.snapshotInbound().isEmpty && Date() < deadline {
+            try await Task.sleep(nanoseconds: 50_000_000)
+        }
+        if core.snapshotInbound().isEmpty { throw BMAPError.timeout }
+        if drain {
+            var last = -1
+            while last != core.snapshotInbound().count {
+                last = core.snapshotInbound().count
+                try await Task.sleep(nanoseconds: 500_000_000) // idle window
+            }
+        }
+        return BMAPFrame.parseAll(core.snapshotInbound())
+    }
 }
