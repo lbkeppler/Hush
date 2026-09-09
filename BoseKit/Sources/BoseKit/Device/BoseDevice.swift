@@ -58,17 +58,20 @@ public actor BoseDevice {
         try checkForError(r)
     }
 
-    // MARK: - Audio settings register `[31.10]` (cnc/autoCNC/spatial/wind/anc), with a
-    // `[31.6]` ModeConfig fallback for devices (e.g. lonestarr / QC Ultra gen-1) that
-    // return FuncNotSupp for `[31.10]` — same situation as bosectl's prince/qc45 devices
-    // (`~/bosectl/python/pybmap/connection.py` `_update_current_mode_config`).
+    // MARK: - Audio settings register `[31.10]` (cnc/autoCNC/spatial/wind/anc).
+    //
+    // v1 scope decision (2026-09-09, Task 16): devices without `[31.10]` (e.g. lonestarr /
+    // QC Ultra gen-1) do NOT get a live noise-control path in v1. Task 15's `[31.6]`
+    // ModeConfig read-modify-write fallback was verified broken on real hardware — the
+    // active mode is a firmware-locked preset (write attempts hit Runtime err 8), and the
+    // 48-byte ModeConfig layout doesn't match this device family (it's 47B with no ANC
+    // byte), so reads returned meaningless values. Rather than ship a broken or misleading
+    // path, ANC/CNC/Wind/Spatial are cleanly `.unsupported` on these devices; live noise
+    // control there is a post-v1 feature built on a custom-mode model instead. See
+    // `docs/superpowers/notes/2026-09-09-lonestarr-verification.md`.
 
     public func audioSettings() async throws -> AudioSettings {
-        guard profile.hasAudioSettingsRegister else {
-            let config = try await currentModeConfig()
-            return AudioSettings(cnc: config.cnc, autoCNC: config.autoCNC, spatial: config.spatial,
-                                  wind: config.wind, anc: config.anc)
-        }
+        guard profile.hasAudioSettingsRegister else { throw BMAPError.unsupported }
         let r = try await sender.send(BMAPBuild.get(Addr.audioSettings), drain: false, timeout: 3)
         return BMAPParse.audioSettings(try first(r, Addr.audioSettings).payload)
     }
@@ -78,37 +81,10 @@ public actor BoseDevice {
         try checkForError(r)
     }
 
-    /// Fetches the `ModeConfig` for the currently active mode: `[31.3]` for the index,
-    /// then `[31.1]` GetAll (via `modes()`) to find that index's config — mirrors
-    /// bosectl's `_current_mode_config` (`mode_idx()` + a lookup in `modes()`), since
-    /// there is no targeted single-mode `[31.6]` GET.
-    private func currentModeConfig() async throws -> ModeConfig {
-        let idx = try await currentMode()
-        let all = try await modes()
-        guard let config = all.first(where: { $0.index == idx }) else { throw BMAPError.unexpectedResponse }
-        return config
-    }
-
-    /// Writes back a `ModeConfig` via `[31.6]` SETGET — the fallback write path used by
-    /// setCNC/setANC/setWind/setSpatial on devices without `[31.10]`. Unlike
-    /// `saveProfile`, this does not gate on `editableSlots`: CNC/ANC/Wind/Spatial are
-    /// live settings that apply to whichever mode is currently active (including
-    /// firmware presets), exactly as `[31.10]` does on devices that have it.
-    private func writeModeConfigFallback(_ config: ModeConfig) async throws {
-        let r = try await sender.send(BMAPBuild.modeConfig40(config), drain: false, timeout: 3)
-        try checkForError(r)
-    }
-
     /// CNC is inverted (0 = max ANC, 10 = ambient); writing it must clear `autoCNC`
     /// (leaving `autoCNC=1` set alongside an explicit level triggers Runtime err 8 — spec §8).
     public func setCNC(_ level: Int) async throws {
-        guard profile.hasAudioSettingsRegister else {
-            var config = try await currentModeConfig()
-            config.cnc = level
-            config.autoCNC = 0
-            try await writeModeConfigFallback(config)
-            return
-        }
+        guard profile.hasAudioSettingsRegister else { throw BMAPError.unsupported }
         var s = try await audioSettings()
         s.cnc = level
         s.autoCNC = 0
@@ -116,24 +92,14 @@ public actor BoseDevice {
     }
 
     public func setANC(_ on: Bool) async throws {
-        guard profile.hasAudioSettingsRegister else {
-            var config = try await currentModeConfig()
-            config.anc = on ? 1 : 0
-            try await writeModeConfigFallback(config)
-            return
-        }
+        guard profile.hasAudioSettingsRegister else { throw BMAPError.unsupported }
         var s = try await audioSettings()
         s.anc = on ? 1 : 0
         try await writeAudioSettings(s)
     }
 
     public func setWind(_ on: Bool) async throws {
-        guard profile.hasAudioSettingsRegister else {
-            var config = try await currentModeConfig()
-            config.wind = on ? 1 : 0
-            try await writeModeConfigFallback(config)
-            return
-        }
+        guard profile.hasAudioSettingsRegister else { throw BMAPError.unsupported }
         var s = try await audioSettings()
         s.wind = on ? 1 : 0
         try await writeAudioSettings(s)
@@ -141,12 +107,7 @@ public actor BoseDevice {
 
     /// `mode`: 0 off / 1 room / 2 head (spec §4.3).
     public func setSpatial(_ mode: Int) async throws {
-        guard profile.hasAudioSettingsRegister else {
-            var config = try await currentModeConfig()
-            config.spatial = mode
-            try await writeModeConfigFallback(config)
-            return
-        }
+        guard profile.hasAudioSettingsRegister else { throw BMAPError.unsupported }
         var s = try await audioSettings()
         s.spatial = mode
         try await writeAudioSettings(s)

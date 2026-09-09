@@ -12,8 +12,9 @@ let dev = BoseDevice(sender: transport, profile: .lonestarr)
 
 // MARK: - status
 
-/// Reads and prints one field in isolation: a `FuncNotSupp` device error (code 4) is
-/// reported as UNSUPPORTED rather than aborting the whole `status` run — some fields
+/// Reads and prints one field in isolation: a `FuncNotSupp` device error (code 4), or a
+/// locally-known `.unsupported` (e.g. noise control on devices without `[31.10]` — Task 16),
+/// is reported as UNSUPPORTED rather than aborting the whole `status` run — some fields
 /// are simply absent on gen-1 hardware, and we want to see every other field regardless.
 func printField<T>(_ name: String, _ read: () async throws -> T) async {
     do {
@@ -21,6 +22,8 @@ func printField<T>(_ name: String, _ read: () async throws -> T) async {
         print("\(name):", value)
     } catch BMAPError.device(code: 4) {
         print("\(name): UNSUPPORTED (FuncNotSupp)")
+    } catch BMAPError.unsupported {
+        print("\(name): UNSUPPORTED")
     } catch {
         print("\(name): ERROR \(error)")
     }
@@ -49,10 +52,11 @@ enum StepResult: Equatable {
 /// (even if the apply/read-back step failed) — except when the step turned out to be
 /// unsupported, in which case nothing was written so there is nothing to restore.
 ///
-/// A `FuncNotSupp` (device error code 4) from either the read or the apply is reported as
-/// UNSUPPORTED rather than FAIL, so the summary can distinguish "gen-1 doesn't have this"
-/// from "this is actually broken". Any other error is reported as FAIL rather than
-/// propagated, so one bad setting doesn't abort the run.
+/// A `FuncNotSupp` (device error code 4) from either the read or the apply, or a
+/// locally-known `.unsupported` (e.g. noise control on devices without `[31.10]` — Task 16),
+/// is reported as UNSUPPORTED rather than FAIL, so the summary can distinguish "gen-1
+/// doesn't have this" from "this is actually broken". Any other error is reported as FAIL
+/// rather than propagated, so one bad setting doesn't abort the run.
 func verifyStep<T: Equatable>(
     _ name: String,
     read: () async throws -> T,
@@ -76,6 +80,9 @@ func verifyStep<T: Equatable>(
         }
     } catch BMAPError.device(code: 4) {
         print("UNSUPPORTED \(name) (FuncNotSupp)")
+        result = .unsupported
+    } catch BMAPError.unsupported {
+        print("UNSUPPORTED \(name)")
         result = .unsupported
     } catch {
         print("FAIL \(name): \(error)")
@@ -104,6 +111,9 @@ func verifyCNC() async -> StepResult {
         current = try await dev.audioSettings()
     } catch BMAPError.device(code: 4) {
         print("UNSUPPORTED CNC (FuncNotSupp)")
+        return .unsupported
+    } catch BMAPError.unsupported {
+        print("UNSUPPORTED CNC")
         return .unsupported
     } catch {
         print("FAIL CNC: \(error)")

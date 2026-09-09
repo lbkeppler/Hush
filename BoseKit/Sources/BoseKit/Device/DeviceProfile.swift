@@ -31,8 +31,11 @@ public struct DeviceProfile: Sendable {
     /// editable slots matched `wolverine` on hardware verification (Milestone 0 / Task 14).
     /// `hasAudioSettingsRegister` is `false` (Task 15 / 2026-09-09 verification): gen-1
     /// returns FuncNotSupp for `[31.10]` AudioSettingsConfig, same as bosectl's
-    /// prince/qc45 devices, so CNC/ANC/Wind/Spatial fall back to the `[31.6]`
-    /// ModeConfig read-modify-write in `BoseDevice`.
+    /// prince/qc45 devices. Task 16 (2026-09-09, v1 scope decision): there is no verified
+    /// live-write path for noise control on this device family (the `[31.6]` ModeConfig
+    /// fallback hit firmware-locked presets and a mismatched payload layout), so
+    /// `BoseDevice` throws `.unsupported` for CNC/ANC/Wind/Spatial/audioSettings here
+    /// instead — see `docs/superpowers/notes/2026-09-09-lonestarr-verification.md`.
     public static let lonestarr = DeviceProfile(
         productID: 0x4066, codename: "lonestarr", rfcommChannel: 2,
         hasAudioSettingsRegister: false, modeConfigStatusLength: 48, modeConfigSetLength: 40,

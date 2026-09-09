@@ -56,3 +56,33 @@ a post-write delay + re-read, or compare bosectl's `build_toggle` behavior.
    Spatial in `BoseDevice` (Task 15).
 3. Re-run `hushctl verify` on hardware to confirm CNC/ANC/Spatial then pass.
 4. Investigate multipoint write timing.
+
+## Task 15 fallback verified broken on hardware (2026-09-09)
+Re-running `hushctl verify` against real lonestarr hardware after Task 15 showed
+the `[31.6]` ModeConfig fallback does **not** work:
+- The active mode (index 0, "Quiet") is a firmware-locked preset. Writing its
+  `ModeConfig` back via `[31.6]` SETGET hits **Runtime err 8** — the same "can't
+  modify a locked slot" error `saveProfile` already guards against for
+  `editableSlots`, just reached via a different path (live noise settings apply
+  to whichever mode is *currently active*, which for most users most of the time
+  is a locked preset, not a custom slot).
+- Independent of the lock issue, the 48-byte `ModeConfig` STATUS layout used by
+  `BMAPParse.modeConfig48` does not match this device family: it's actually
+  **47 bytes** here and has **no ANC byte** at all, so reads through that path
+  returned meaningless values even before the write was attempted.
+
+## v1 decision
+Per product decision, **v1 ships without live ANC/CNC/Wind/Spatial control on
+devices without `[31.10]`** (gen-1 / lonestarr). There is no verified live-write
+path over firmware presets on this device family, and the ModeConfig layout
+assumed by the Task 15 fallback is wrong for it besides. Rather than ship a
+broken or misleading control, `BoseDevice.audioSettings()`/`setCNC`/`setANC`/
+`setWind`/`setSpatial` now throw `BMAPError.unsupported` immediately when
+`profile.hasAudioSettingsRegister == false` (Task 16) — surfaced by `hushctl` as
+a clean `UNSUPPORTED`, same as a device-reported `FuncNotSupp`.
+
+Live noise control on gen-1 is **post-v1**: it needs a custom-mode model (write
+to one of the user's own editable slots — `[31.6]` `editableSlots` 4...10, which
+*is* writable per `saveProfile` — rather than the currently-active locked
+preset), plus the correct 47-byte/no-ANC-byte payload layout for this device
+family. That is out of scope here and tracked separately.
