@@ -25,3 +25,17 @@ public struct EQBand: Equatable, Sendable {
     public var value: Int
     public init(band: Int, value: Int) { self.band = band; self.value = value }
 }
+
+public struct AudioSettings: Equatable, Sendable {
+    public var cnc: Int; public var autoCNC: Int; public var spatial: Int; public var wind: Int; public var anc: Int
+    public init(cnc: Int, autoCNC: Int, spatial: Int, wind: Int, anc: Int) {
+        self.cnc = cnc; self.autoCNC = autoCNC; self.spatial = spatial; self.wind = wind; self.anc = anc
+    }
+}
+
+public extension BMAPParse {
+    static func audioSettings(_ p: [UInt8]) -> AudioSettings {
+        func b(_ i: Int) -> Int { i < p.count ? Int(p[i]) : 0 }
+        return AudioSettings(cnc: b(0), autoCNC: b(1), spatial: b(2), wind: b(3), anc: b(4))
+    }
+}
