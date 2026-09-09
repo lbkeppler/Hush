@@ -42,7 +42,8 @@ public actor BoseDevice {
     }
 
     public func setName(_ name: String) async throws {
-        _ = try await sender.send(BMAPBuild.setName(name), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.setName(name), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Mode
@@ -53,7 +54,8 @@ public actor BoseDevice {
     }
 
     public func setMode(_ index: Int, announce: Bool = false) async throws {
-        _ = try await sender.send(BMAPBuild.setMode(index: index, announce: announce), drain: true, timeout: 3)
+        let r = try await sender.send(BMAPBuild.setMode(index: index, announce: announce), drain: true, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Audio settings register `[31.10]` (cnc/autoCNC/spatial/wind/anc)
@@ -64,7 +66,8 @@ public actor BoseDevice {
     }
 
     private func writeAudioSettings(_ s: AudioSettings) async throws {
-        _ = try await sender.send(BMAPBuild.audioSettings(s), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.audioSettings(s), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     /// CNC is inverted (0 = max ANC, 10 = ambient); writing it must clear `autoCNC`
@@ -109,7 +112,8 @@ public actor BoseDevice {
     }
 
     public func setEQ(band: Int, value: Int) async throws {
-        _ = try await sender.send(BMAPBuild.eqBand(value: value, band: band), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.eqBand(value: value, band: band), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Sidetone
@@ -120,7 +124,8 @@ public actor BoseDevice {
     }
 
     public func setSidetone(_ level: Int) async throws {
-        _ = try await sender.send(BMAPBuild.setSidetone(level: level), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.setSidetone(level: level), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Multipoint
@@ -131,7 +136,8 @@ public actor BoseDevice {
     }
 
     public func setMultipoint(_ on: Bool) async throws {
-        _ = try await sender.send(BMAPBuild.toggle(Addr.multipoint, on: on), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.toggle(Addr.multipoint, on: on), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Auto-pause / Auto-answer
@@ -142,7 +148,8 @@ public actor BoseDevice {
     }
 
     public func setAutoPause(_ on: Bool) async throws {
-        _ = try await sender.send(BMAPBuild.toggle(Addr.autoPause, on: on), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.toggle(Addr.autoPause, on: on), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     public func autoAnswer() async throws -> Bool {
@@ -151,7 +158,8 @@ public actor BoseDevice {
     }
 
     public func setAutoAnswer(_ on: Bool) async throws {
-        _ = try await sender.send(BMAPBuild.toggle(Addr.autoAnswer, on: on), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.toggle(Addr.autoAnswer, on: on), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Voice prompts
@@ -162,7 +170,8 @@ public actor BoseDevice {
     }
 
     public func setVoicePrompts(enabled: Bool, language: Int) async throws {
-        _ = try await sender.send(BMAPBuild.setVoicePrompts(enabled: enabled, language: language), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.setVoicePrompts(enabled: enabled, language: language), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Buttons
@@ -173,7 +182,8 @@ public actor BoseDevice {
     }
 
     public func setButton(_ mapping: ButtonMapping) async throws {
-        _ = try await sender.send(BMAPBuild.setButton(mapping), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.setButton(mapping), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     // MARK: - Profiles / ModeConfig
@@ -191,7 +201,8 @@ public actor BoseDevice {
     /// reject locally rather than round-tripping to get a Runtime err 8 back.
     public func saveProfile(_ config: ModeConfig) async throws {
         guard profile.editableSlots.contains(config.index) else { throw BMAPError.unsupported }
-        _ = try await sender.send(BMAPBuild.modeConfig40(config), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.modeConfig40(config), drain: false, timeout: 3)
+        try checkForError(r)
     }
 
     /// Delete = overwrite the named editable slot with name "None" and zeroed settings
@@ -209,6 +220,7 @@ public actor BoseDevice {
         cleared.spatial = 0
         cleared.wind = 0
         cleared.anc = 0
-        _ = try await sender.send(BMAPBuild.modeConfig40(cleared), drain: false, timeout: 3)
+        let r = try await sender.send(BMAPBuild.modeConfig40(cleared), drain: false, timeout: 3)
+        try checkForError(r)
     }
 }

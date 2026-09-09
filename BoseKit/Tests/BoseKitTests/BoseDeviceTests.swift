@@ -56,6 +56,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x02, function: 0x02, op: .status, payload: [0x50,0xff,0xff,0x00])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.battery() == 80)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.battery))
 }
 
 @Test func batteryPropagatesDeviceErrorFrame() async throws {
@@ -116,6 +118,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x1f, function: 0x03, op: .status, payload: [0x02])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.currentMode() == 2)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.currentMode))
 }
 
 @Test func setModeSendsStartWithAnnounceFlag() async throws {
@@ -135,6 +139,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     let s = try await dev.audioSettings()
     #expect(s == AudioSettings(cnc: 3, autoCNC: 0, spatial: 2, wind: 0, anc: 1))
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.audioSettings))
 }
 
 @Test func setCNCReadModifyWrites() async throws {
@@ -148,6 +154,23 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     let sent = await mock.sent
     #expect(sent.last?.op == .setGet)
     #expect(sent.last?.payload == [0x05,0x00,0x00,0x00,0x01]) // cnc=5, autoCNC cleared, anc=1 preserved
+}
+
+@Test func setCNCPropagatesDeviceErrorOnWrite() async throws {
+    // A write's own ERROR reply (e.g. Runtime err 8 for an autoCNC conflict) must
+    // surface as a thrown error, not be silently swallowed.
+    let mock = MockSender()
+    await mock.setReplies([
+        [BMAPFrame(fblock: 0x1f, function: 0x0a, op: .status, payload: [0x00,0x00,0x00,0x00,0x01])],
+        [BMAPFrame(fblock: 0x1f, function: 0x0a, op: .error, payload: [0x08])],
+    ])
+    let dev = BoseDevice(sender: mock, profile: .wolverine)
+    do {
+        try await dev.setCNC(5)
+        Issue.record("expected setCNC to throw on a device ERROR reply")
+    } catch let error as BMAPError {
+        #expect(error == .device(code: 8))
+    }
 }
 
 @Test func setANCReadModifyWritesPreservingOtherFields() async throws {
@@ -228,6 +251,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x01, function: 0x0b, op: .status, payload: [0x01,0x02])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.sidetone() == 2)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.sidetone))
 }
 
 @Test func setSidetoneSendsSETGET() async throws {
@@ -246,6 +271,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x01, function: 0x0a, op: .status, payload: [0x02])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.multipoint() == true)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.multipoint))
 }
 
 @Test func setMultipointSendsPlainBit() async throws {
@@ -264,6 +291,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x01, function: 0x18, op: .status, payload: [0x01])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.autoPause() == true)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.autoPause))
 }
 
 @Test func setAutoPauseSendsSETGET() async throws {
@@ -280,6 +309,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     await mock.setReplies([[BMAPFrame(fblock: 0x01, function: 0x1b, op: .status, payload: [0x00])]])
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     #expect(try await dev.autoAnswer() == false)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.autoAnswer))
 }
 
 @Test func setAutoAnswerSendsSETGET() async throws {
@@ -299,6 +330,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     let r = try await dev.voicePrompts()
     #expect(r.enabled == true && r.language == 3)
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.voicePrompts))
 }
 
 @Test func setVoicePromptsSendsEncodedByte() async throws {
@@ -318,6 +351,8 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     let dev = BoseDevice(sender: mock, profile: .wolverine)
     let m = try await dev.buttons()
     #expect(m == ButtonMapping(button: 1, event: 2, action: 3))
+    let sent = await mock.sent
+    #expect(sent.last == BMAPBuild.get(Addr.buttons))
 }
 
 @Test func setButtonSendsSETGET() async throws {
