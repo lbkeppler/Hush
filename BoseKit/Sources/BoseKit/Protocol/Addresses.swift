@@ -1,0 +1,18 @@
+public enum Addr {
+    public static let firmware: (UInt8, UInt8)      = (0x00, 0x05)
+    public static let name: (UInt8, UInt8)          = (0x01, 0x02)
+    public static let voicePrompts: (UInt8, UInt8)  = (0x01, 0x03)
+    public static let cnc: (UInt8, UInt8)           = (0x01, 0x05)
+    public static let eq: (UInt8, UInt8)            = (0x01, 0x07)
+    public static let buttons: (UInt8, UInt8)       = (0x01, 0x09)
+    public static let multipoint: (UInt8, UInt8)    = (0x01, 0x0a)
+    public static let sidetone: (UInt8, UInt8)      = (0x01, 0x0b)
+    public static let autoPause: (UInt8, UInt8)     = (0x01, 0x18)
+    public static let autoAnswer: (UInt8, UInt8)    = (0x01, 0x1b)
+    public static let battery: (UInt8, UInt8)       = (0x02, 0x02)
+    public static let control: (UInt8, UInt8)       = (0x07, 0x04)
+    public static let modesList: (UInt8, UInt8)     = (0x1f, 0x01)
+    public static let currentMode: (UInt8, UInt8)   = (0x1f, 0x03)
+    public static let modeConfig: (UInt8, UInt8)    = (0x1f, 0x06)
+    public static let audioSettings: (UInt8, UInt8) = (0x1f, 0x0a)
+}
