@@ -51,6 +51,8 @@ public extension BMAPBuild {
 
 extension Array where Element == UInt8 {
     subscript(safe range: Range<Int>) -> ArraySlice<UInt8> {
-        self[Swift.max(0, range.lowerBound)..<Swift.min(count, range.upperBound)]
+        let lo = Swift.min(count, Swift.max(0, range.lowerBound))
+        let hi = Swift.min(count, Swift.max(0, range.upperBound))
+        return self[lo..<Swift.max(lo, hi)]
     }
 }

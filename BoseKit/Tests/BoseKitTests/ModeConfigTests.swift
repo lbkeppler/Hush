@@ -25,3 +25,15 @@ import Testing
     #expect(p[8] == 0)          // null padding begins
     #expect(p[35] == 3 && p[37] == 1 && p[39] == 1) // cnc, spatial, anc
 }
+
+@Test func handlesEmptyPayloadWithoutCrashing() {
+    let c = BMAPParse.modeConfig48([])
+    #expect(c.index == 0 && c.name == "" && !c.editable && !c.configured)
+    #expect(c.cnc == 0 && c.anc == 0)
+}
+
+@Test func handlesShortPayloadWithoutCrashing() {
+    let c = BMAPParse.modeConfig48([5, 0, 0, 1, 1])  // 5 bytes: index=5, editable=1 @ [3], configured=1 @ [4]
+    #expect(c.index == 5 && c.name == "" && c.editable && c.configured)
+    #expect(c.cnc == 0 && c.anc == 0)  // beyond payload, should be 0
+}
