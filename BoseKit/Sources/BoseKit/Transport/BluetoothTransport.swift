@@ -17,7 +17,11 @@ public actor BluetoothTransport {
         let rc: IOReturn = await withCheckedContinuation { cont in
             core.start { cont.resume(returning: $0) }
         }
-        guard rc == kIOReturnSuccess else { throw BMAPError.notConnected }
+        guard rc == kIOReturnSuccess else {
+            core.stop()
+            self.core = nil
+            throw BMAPError.notConnected
+        }
         try await Task.sleep(nanoseconds: 500_000_000) // drain window
         core.clearInbound()
     }

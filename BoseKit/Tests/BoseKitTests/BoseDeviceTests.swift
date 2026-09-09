@@ -30,24 +30,22 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
 @Test func deviceProfileWolverineValues() {
     #expect(DeviceProfile.wolverine.productID == 0x4082)
     #expect(DeviceProfile.wolverine.codename == "wolverine")
-    #expect(DeviceProfile.wolverine.rfcommChannel == 2)
     #expect(DeviceProfile.wolverine.hasAudioSettingsRegister == true)
-    #expect(DeviceProfile.wolverine.modeConfigStatusLength == 48)
-    #expect(DeviceProfile.wolverine.modeConfigSetLength == 40)
     #expect(DeviceProfile.wolverine.editableSlots == 4...10)
+    #expect(DeviceProfile.wolverine.supportsCustomProfiles == true)
 }
 
 @Test func deviceProfileLonestarrValues() {
-    // Task 14 hardware verification: RFCOMM channel, ModeConfig lengths, and editable
-    // slots match wolverine. Task 15 / 2026-09-09 verification: gen-1 does NOT expose
-    // [31.10] (FuncNotSupp), unlike wolverine — this is the one deliberate divergence.
+    // Task 14 hardware verification: editable slots match wolverine. Task 15 /
+    // 2026-09-09 verification: gen-1 does NOT expose [31.10] (FuncNotSupp), unlike
+    // wolverine. Task "final-review" (2026-09-09): gen-1's real ModeConfig is 47B with
+    // no ANC byte, so custom profiles (which assume the 48/40-byte layout) are gated
+    // off entirely for this device — the other deliberate divergence from wolverine.
     #expect(DeviceProfile.lonestarr.productID == 0x4066)
     #expect(DeviceProfile.lonestarr.codename == "lonestarr")
-    #expect(DeviceProfile.lonestarr.rfcommChannel == DeviceProfile.wolverine.rfcommChannel)
     #expect(DeviceProfile.lonestarr.hasAudioSettingsRegister == false)
-    #expect(DeviceProfile.lonestarr.modeConfigStatusLength == DeviceProfile.wolverine.modeConfigStatusLength)
-    #expect(DeviceProfile.lonestarr.modeConfigSetLength == DeviceProfile.wolverine.modeConfigSetLength)
     #expect(DeviceProfile.lonestarr.editableSlots == DeviceProfile.wolverine.editableSlots)
+    #expect(DeviceProfile.lonestarr.supportsCustomProfiles == false)
 }
 
 // MARK: - Battery / Firmware / Name
@@ -521,4 +519,62 @@ private func modeConfigPayload(index: Int, name: String, editable: Bool, configu
     } catch let error as BMAPError {
         #expect(error == .unexpectedResponse)
     }
+}
+
+// MARK: - Custom profiles gated on `supportsCustomProfiles` (gen-1 / lonestarr)
+//
+// lonestarr's real ModeConfig is 47B with no ANC byte, so the 48/40-byte parse/build
+// this kit uses would return garbage on read and write the wrong bytes on write.
+// `modes()`/`saveProfile()`/`deleteProfile()` must refuse locally before any I/O.
+
+@Test func modesThrowsUnsupportedWhenCustomProfilesNotSupported() async throws {
+    let mock = MockSender()
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    do {
+        _ = try await dev.modes()
+        Issue.record("expected modes() to throw")
+    } catch let error as BMAPError {
+        #expect(error == .unsupported)
+    }
+    let sent = await mock.sent
+    #expect(sent.isEmpty) // rejected locally, never round-tripped to the device
+}
+
+@Test func saveProfileThrowsUnsupportedWhenCustomProfilesNotSupported() async throws {
+    let mock = MockSender()
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    let cfg = ModeConfig(index: 5, name: "Focus", editable: true, configured: true,
+                          cnc: 3, autoCNC: 0, spatial: 1, wind: 0, anc: 1)
+    do {
+        try await dev.saveProfile(cfg)
+        Issue.record("expected saveProfile to throw")
+    } catch let error as BMAPError {
+        #expect(error == .unsupported)
+    }
+    let sent = await mock.sent
+    #expect(sent.isEmpty)
+}
+
+@Test func deleteProfileThrowsUnsupportedWhenCustomProfilesNotSupported() async throws {
+    let mock = MockSender()
+    let dev = BoseDevice(sender: mock, profile: .lonestarr)
+    do {
+        try await dev.deleteProfile(name: "Focus")
+        Issue.record("expected deleteProfile to throw")
+    } catch let error as BMAPError {
+        #expect(error == .unsupported)
+    }
+    let sent = await mock.sent
+    #expect(sent.isEmpty)
+}
+
+@Test func modesWorksOnProfileThatSupportsCustomProfiles() async throws {
+    let mock = MockSender()
+    let quiet = modeConfigPayload(index: 0, name: "Quiet", editable: false, configured: true,
+                                   cnc: 0, autoCNC: 0, spatial: 0, wind: 0, anc: 1)
+    await mock.setReplies([[BMAPFrame(fblock: 0x1f, function: 0x06, op: .status, payload: quiet)]])
+    #expect(DeviceProfile.wolverine.supportsCustomProfiles == true)
+    let dev = BoseDevice(sender: mock, profile: .wolverine)
+    let modes = try await dev.modes()
+    #expect(modes.count == 1 && modes[0].name == "Quiet")
 }

@@ -213,6 +213,7 @@ public actor BoseDevice {
     /// `START [31.1]`, drained — the device streams a `[31.6]` STATUS frame (48B) per
     /// mode (locked presets 0–3 plus whatever custom slots exist).
     public func modes() async throws -> [ModeConfig] {
+        guard profile.supportsCustomProfiles else { throw BMAPError.unsupported }
         let r = try await sender.send(BMAPBuild.listProfiles(), drain: true, timeout: 3)
         try checkForError(r)
         return r.filter { ($0.fblock, $0.function) == Addr.modeConfig }
@@ -222,6 +223,7 @@ public actor BoseDevice {
     /// Writes a custom profile slot. Presets 0–3 are firmware-locked (spec §4.4/§8) —
     /// reject locally rather than round-tripping to get a Runtime err 8 back.
     public func saveProfile(_ config: ModeConfig) async throws {
+        guard profile.supportsCustomProfiles else { throw BMAPError.unsupported }
         guard profile.editableSlots.contains(config.index) else { throw BMAPError.unsupported }
         let r = try await sender.send(BMAPBuild.modeConfig40(config), drain: false, timeout: 3)
         try checkForError(r)
@@ -230,6 +232,7 @@ public actor BoseDevice {
     /// Delete = overwrite the named editable slot with name "None" and zeroed settings
     /// (spec §4.4 — there is no dedicated delete opcode).
     public func deleteProfile(name: String) async throws {
+        guard profile.supportsCustomProfiles else { throw BMAPError.unsupported }
         let all = try await modes()
         guard let match = all.first(where: { $0.name == name && $0.editable }) else {
             throw BMAPError.unexpectedResponse

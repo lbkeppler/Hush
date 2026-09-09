@@ -8,9 +8,9 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
     private var thread: Thread?
     private let lock = NSLock()
     private var inbound = Data()
-    private(set) var openStatus: IOReturn = kIOReturnError
     private var opened = false
     private var basebandConnected = false
+    private var btDevice: IOBluetoothDevice?
 
     init(address: String, channelID: BluetoothRFCOMMChannelID) {
         self.address = address; self.channelID = channelID
@@ -23,6 +23,7 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
             let rl = RunLoop.current
             rl.add(NSMachPort(), forMode: .default) // keep the run loop alive with a source
             let device = IOBluetoothDevice(addressString: self.address)
+            self.lock.lock(); self.btDevice = device; self.lock.unlock()
             device?.performSDPQuery(nil)
             rl.run(until: Date().addingTimeInterval(1.5)) // let SDP register
 
@@ -43,7 +44,7 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
 
             var ch: IOBluetoothRFCOMMChannel?
             let rc = device?.openRFCOMMChannelSync(&ch, withChannelID: self.channelID, delegate: self) ?? kIOReturnError
-            self.lock.lock(); self.openStatus = rc; self.opened = (rc == kIOReturnSuccess); self.channel = ch; self.lock.unlock()
+            self.lock.lock(); self.opened = (rc == kIOReturnSuccess); self.channel = ch; self.lock.unlock()
             completion(rc)
             // Keep pumping so delegate callbacks are delivered for the life of the connection.
             while true {
@@ -84,8 +85,16 @@ final class TransportCore: NSObject, IOBluetoothRFCOMMChannelDelegate, @unchecke
     }
     func stop() {
         lock.lock()
+        let ch = channel
+        let device = btDevice
+        channel = nil
+        opened = false
         thread?.cancel()
         thread = nil
         lock.unlock()
+        // Tear down the RFCOMM channel and baseband link so a subsequent reconnect
+        // isn't blocked by a lingering open channel/connection on the device side.
+        _ = ch?.close()
+        device?.closeConnection()
     }
 }
