@@ -137,18 +137,27 @@ public struct MainWindow: View {
         .buttonStyle(.plain)
     }
 
+    /// Mirrors `MenuBarView`'s `connectionState` structure: a directional headline first
+    /// (never the raw error string), with the device's raw error text — when there is one —
+    /// as a smaller muted secondary line underneath.
     private var connectionFooter: some View {
-        HStack(spacing: 8) {
-            Circle()
-                .fill(connectionColor)
-                .frame(width: 8, height: 8)
-            Text(statusText)
-                .font(DT.body(12))
-                .foregroundStyle(DT.muted(scheme))
-                .lineLimit(1)
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(connectionColor)
+                    .frame(width: 8, height: 8)
+                Text(statusHeadline)
+                    .font(DT.body(12))
+                    .foregroundStyle(DT.muted(scheme))
+            }
 
-            if case .error = controller.state.status {
-                Spacer(minLength: 8)
+            if case .error(let message) = controller.state.status {
+                Text(message)
+                    .font(DT.body(10))
+                    .foregroundStyle(DT.muted(scheme))
+                    .lineLimit(2)
+                    .help(message)
+
                 Button {
                     Task { await controller.start() }
                 } label: {
@@ -169,12 +178,14 @@ public struct MainWindow: View {
         }
     }
 
-    private var statusText: String {
+    /// Direction, not mood — never the raw `BoseController.describe(_:)` string. `.disconnected`
+    /// and `.error` share MenuBar's headline so the two surfaces read as one voice; `.error`'s
+    /// raw message is surfaced separately (see `connectionFooter`), not as this headline.
+    private var statusHeadline: String {
         switch controller.state.status {
         case .connected: "Connected"
         case .connecting: "Connecting…"
-        case .disconnected: "Disconnected"
-        case .error(let message): message
+        case .disconnected, .error: "Headphones not connected — connect in System Settings"
         }
     }
 
