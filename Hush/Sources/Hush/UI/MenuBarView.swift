@@ -54,7 +54,7 @@ public struct MenuBarView: View {
                     .lineLimit(2)
             }
 
-            openHushButton
+            footer
         }
         .padding(16)
         .frame(width: 340)
@@ -222,7 +222,41 @@ public struct MenuBarView: View {
         .padding(.top, 2)
     }
 
-    // MARK: - Open Hush
+    // MARK: - Footer (Open Hush + Quit)
+
+    private var footer: some View {
+        HStack(spacing: 8) {
+            openHushButton
+            quitButton
+        }
+    }
+
+    /// Quits the app. A menu-bar (`.accessory`) app has no standard menu bar / Cmd-Q
+    /// affordance, so the popover carries its own quit control.
+    private var quitButton: some View {
+        Button {
+            #if canImport(AppKit)
+            NSApp.terminate(nil)
+            #endif
+        } label: {
+            Image(systemName: "power")
+                .font(.system(size: 14, weight: .medium))
+                .frame(width: 40)
+                .padding(.vertical, 8)
+                .foregroundStyle(DT.muted(scheme))
+                .background(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(DT.surface(scheme))
+                )
+                .overlay(
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .strokeBorder(DT.hairline(scheme), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+        .help("Quit Hush")
+        .accessibilityLabel("Quit Hush")
+    }
 
     private var openHushButton: some View {
         Button {
