@@ -131,30 +131,45 @@ public struct SettingsSection: View {
                             RoundedRectangle(cornerRadius: 8, style: .continuous)
                                 .strokeBorder(DT.hairline(scheme), lineWidth: 1)
                         )
+                        .onSubmit { save() }
 
                     Button {
-                        controller.setName(nameDraft)
+                        save()
                     } label: {
                         Text("Save")
                             .font(DT.body(13))
-                            .foregroundStyle(DT.accent(scheme))
+                            .foregroundStyle(hasPendingNameChange ? DT.accent(scheme) : DT.text(scheme))
                             .padding(.horizontal, 14)
                             .padding(.vertical, 8)
                             .background(
                                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .fill(DT.accent(scheme).opacity(0.14))
+                                    .fill(hasPendingNameChange ? DT.accent(scheme).opacity(0.14) : Color.clear)
                             )
                             .overlay(
                                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                    .strokeBorder(DT.accent(scheme), lineWidth: 1)
+                                    .strokeBorder(hasPendingNameChange ? DT.accent(scheme) : DT.hairline(scheme), lineWidth: 1)
                             )
+                            .opacity(hasPendingNameChange ? 1 : 0.5)
                     }
                     .buttonStyle(.plain)
-                    .disabled(nameDraft.isEmpty)
+                    .disabled(!hasPendingNameChange)
                 }
             }
         }
         .frame(maxWidth: 420)
+    }
+
+    /// Save only lights up champagne (DT.accent) — the active/pending-change state — when
+    /// the draft differs from the device's current name and isn't blank/whitespace-only.
+    private var hasPendingNameChange: Bool {
+        nameDraft != controller.state.name && !nameDraft.trimmingCharacters(in: .whitespaces).isEmpty
+    }
+
+    private func save() {
+        let trimmed = nameDraft.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+        nameDraft = trimmed
+        controller.setName(trimmed)
     }
 
     // MARK: - Multipoint (read-only)

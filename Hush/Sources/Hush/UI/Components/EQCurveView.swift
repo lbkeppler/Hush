@@ -45,6 +45,7 @@ public struct EQCurveView: View {
                         .frame(width: dotDiameter, height: dotDiameter)
                         .shadow(color: .black.opacity(0.2), radius: 2, y: 1)
                         .position(point)
+                        .focusable()
                         .gesture(
                             DragGesture(minimumDistance: 0, coordinateSpace: .named("eqCurve"))
                                 .onChanged { drag in

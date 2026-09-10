@@ -16,19 +16,8 @@ public struct ModesSection: View {
     /// sets (gen-1 gates noise control to mode selection).
     @State private var cncLevel: Double = 5
 
-    private struct ModeDefinition: Identifiable {
-        let index: Int
-        let title: String
-        let icon: String
-        var id: Int { index }
-    }
-
-    private let presets: [ModeDefinition] = [
-        ModeDefinition(index: 0, title: "Quiet", icon: "moon.fill"),
-        ModeDefinition(index: 1, title: "Aware", icon: "ear"),
-        ModeDefinition(index: 2, title: "Immersion", icon: "waveform"),
-        ModeDefinition(index: 3, title: "Cinema", icon: "tv"),
-    ]
+    /// Shared with `MenuBarView` — see `ModeDefinition.swift`.
+    private let presets: [ModeDefinition] = ModePresets.all
 
     public init(controller: BoseController) {
         self.controller = controller

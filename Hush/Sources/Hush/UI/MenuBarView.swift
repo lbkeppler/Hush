@@ -21,13 +21,6 @@ public struct MenuBarView: View {
     /// `state.supportsLiveNoise` is true, which no current device profile sets.
     @State private var cncLevel: Double = 5
 
-    private struct ModeDefinition: Identifiable {
-        let index: Int
-        let title: String
-        let icon: String
-        var id: Int { index }
-    }
-
     private struct EQPreset: Identifiable {
         let name: String
         /// Bass, mid, treble — matches `EQBand.band` 0/1/2.
@@ -35,12 +28,8 @@ public struct MenuBarView: View {
         var id: String { name }
     }
 
-    private let modes: [ModeDefinition] = [
-        ModeDefinition(index: 0, title: "Quiet", icon: "moon.fill"),
-        ModeDefinition(index: 1, title: "Aware", icon: "ear"),
-        ModeDefinition(index: 2, title: "Immersion", icon: "waveform"),
-        ModeDefinition(index: 3, title: "Cinema", icon: "tv"),
-    ]
+    /// Shared with `ModesSection` — see `ModeDefinition.swift`.
+    private let modes: [ModeDefinition] = ModePresets.all
 
     private let eqPresets: [EQPreset] = [
         EQPreset(name: "Flat", values: [0, 0, 0]),
@@ -215,6 +204,7 @@ public struct MenuBarView: View {
                     Text(message)
                         .font(DT.body(11))
                         .foregroundStyle(DT.muted(scheme))
+                    retryButton
                 default:
                     Text("Headphones not connected — connect in System Settings")
                         .font(DT.body(13))
@@ -222,6 +212,21 @@ public struct MenuBarView: View {
                 }
             }
         }
+    }
+
+    /// Retries device discovery/connection — shown only for `.error`, where the failure may
+    /// be transient (e.g. a dropped BLE session), unlike `.disconnected`, which means no
+    /// device is paired.
+    private var retryButton: some View {
+        Button {
+            Task { await controller.start() }
+        } label: {
+            Text("Retry")
+                .font(DT.body(12))
+                .foregroundStyle(DT.text(scheme))
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 2)
     }
 
     // MARK: - Open Hush
