@@ -11,8 +11,8 @@ struct HushApp: App {
         .menuBarExtraStyle(.window)
 
         WindowGroup("Hush", id: "main") {
-            Text("Hush")
-                .frame(width: 480, height: 320)
+            MainWindow(controller: controller)
+                .frame(minWidth: 900, minHeight: 640)
                 .task {
                     await controller.start()
                 }
