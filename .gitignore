@@ -10,5 +10,11 @@ DerivedData/
 # macOS
 .DS_Store
 
+# Build output / distribution
+dist/
+
+# Playwright MCP scratch
+.playwright-mcp/
+
 # Superpowers SDD scratch (ledgers, briefs, review packages)
 .superpowers/
