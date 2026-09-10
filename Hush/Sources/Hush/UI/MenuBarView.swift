@@ -21,21 +21,11 @@ public struct MenuBarView: View {
     /// `state.supportsLiveNoise` is true, which no current device profile sets.
     @State private var cncLevel: Double = 5
 
-    private struct EQPreset: Identifiable {
-        let name: String
-        /// Bass, mid, treble — matches `EQBand.band` 0/1/2.
-        let values: [Int]
-        var id: String { name }
-    }
-
     /// Shared with `ModesSection` — see `ModeDefinition.swift`.
     private let modes: [ModeDefinition] = ModePresets.all
 
-    private let eqPresets: [EQPreset] = [
-        EQPreset(name: "Flat", values: [0, 0, 0]),
-        EQPreset(name: "Bass boost", values: [6, 2, -2]),
-        EQPreset(name: "Podcast", values: [-2, 4, 3]),
-    ]
+    /// Shared with `SoundSection` — see `EQPresetDefinition.swift`.
+    private let eqPresets: [EQPreset] = EQPresets.all
 
     public init(controller: BoseController) {
         self.controller = controller
@@ -104,12 +94,15 @@ public struct MenuBarView: View {
         }
     }
 
+    /// Direction, not mood — never the raw `BoseController.describe(_:)` string. `.disconnected`
+    /// and `.error` share `MainWindow.statusHeadline`'s copy so the two surfaces read as one
+    /// voice; `.error`'s raw message is surfaced separately, in `connectionState` below and in
+    /// the `lastError` line, not as this header subtitle.
     private var statusText: String {
         switch controller.state.status {
         case .connected: "Connected"
         case .connecting: "Connecting…"
-        case .disconnected: "Disconnected"
-        case .error(let message): message
+        case .disconnected, .error: "Headphones not connected — connect in System Settings"
         }
     }
 

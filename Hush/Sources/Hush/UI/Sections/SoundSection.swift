@@ -11,18 +11,8 @@ public struct SoundSection: View {
 
     @Environment(\.colorScheme) private var scheme
 
-    private struct Preset: Identifiable {
-        let id: String
-        let title: String
-        /// [bass, mid, treble]
-        let values: [Int]
-    }
-
-    private let presets: [Preset] = [
-        Preset(id: "flat", title: "Flat", values: [0, 0, 0]),
-        Preset(id: "bass", title: "Bass boost", values: [6, 0, 2]),
-        Preset(id: "podcast", title: "Podcast", values: [-2, 3, 1]),
-    ]
+    /// Shared with `MenuBarView` — see `EQPresetDefinition.swift`.
+    private let presets: [EQPreset] = EQPresets.all
 
     public init(controller: BoseController) {
         self.controller = controller
@@ -100,7 +90,7 @@ public struct SoundSection: View {
     private var presetRow: some View {
         HStack(spacing: 12) {
             ForEach(presets) { preset in
-                ModeChip(title: preset.title, active: bandValues == preset.values) {
+                ModeChip(title: preset.name, active: bandValues == preset.values) {
                     apply(preset)
                 }
             }
@@ -114,7 +104,7 @@ public struct SoundSection: View {
         !presets.contains { $0.values == bandValues }
     }
 
-    private func apply(_ preset: Preset) {
+    private func apply(_ preset: EQPreset) {
         for (band, value) in preset.values.enumerated() {
             controller.setEQ(band: band, value: value)
         }
