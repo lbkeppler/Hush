@@ -176,10 +176,7 @@ public struct MainWindow: View {
         case .sound:
             SoundSection(controller: controller)
         case .settings:
-            Text("Settings")
-                .font(DT.body(13))
-                .foregroundStyle(DT.muted(scheme))
-                .padding(32)
+            SettingsSection(controller: controller)
         }
     }
 }
