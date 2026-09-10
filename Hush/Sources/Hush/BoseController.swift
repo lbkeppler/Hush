@@ -167,14 +167,18 @@ public final class BoseController {
 
     // MARK: - Intents
 
-    /// Immediate (not debounced) — mode switches are discrete, infrequent actions.
+    /// Immediate (not debounced) — mode switches are discrete, infrequent actions. Writes,
+    /// then reconciles `state.currentModeIndex` from a fresh read (BLE can clamp/reject a
+    /// write); a write failure records `lastError` without touching connection `status`.
     public func switchMode(index: Int) async {
         guard let provider else { return }
         state.currentModeIndex = index
         do {
             try await provider.setMode(index: index, announce: false)
+            state.lastError = nil
+            state.currentModeIndex = (try? await provider.currentMode()) ?? index
         } catch {
-            state.status = .error(describe(error))
+            state.lastError = describe(error)
         }
     }
 
@@ -187,54 +191,79 @@ public final class BoseController {
         } else {
             state.eq = (state.eq ?? []) + [EQBand(band: band, value: value)]
         }
-        debounce(key: "eq-\(band)") { provider in
+        debounce(key: "eq-\(band)", write: { provider in
             try await provider.setEQ(band: band, value: value)
-        }
+        }, reconcile: { [weak self] provider in
+            guard let self else { return }
+            self.state.eq = (try? await provider.eq()) ?? self.state.eq
+        })
     }
 
     public func setSidetone(_ level: Int) {
         guard provider != nil else { return }
         state.sidetone = level
-        debounce(key: "sidetone") { provider in
+        debounce(key: "sidetone", write: { provider in
             try await provider.setSidetone(level)
-        }
+        }, reconcile: { [weak self] provider in
+            guard let self else { return }
+            self.state.sidetone = (try? await provider.sidetone()) ?? self.state.sidetone
+        })
     }
 
     public func setAutoPause(_ on: Bool) {
         guard provider != nil else { return }
         state.autoPause = on
-        debounce(key: "autoPause") { provider in
+        debounce(key: "autoPause", write: { provider in
             try await provider.setAutoPause(on)
-        }
+        }, reconcile: { [weak self] provider in
+            guard let self else { return }
+            self.state.autoPause = (try? await provider.autoPause()) ?? self.state.autoPause
+        })
     }
 
     public func setAutoAnswer(_ on: Bool) {
         guard provider != nil else { return }
         state.autoAnswer = on
-        debounce(key: "autoAnswer") { provider in
+        debounce(key: "autoAnswer", write: { provider in
             try await provider.setAutoAnswer(on)
-        }
+        }, reconcile: { [weak self] provider in
+            guard let self else { return }
+            self.state.autoAnswer = (try? await provider.autoAnswer()) ?? self.state.autoAnswer
+        })
     }
 
     public func setName(_ name: String) {
         guard provider != nil else { return }
         state.name = name
-        debounce(key: "name") { provider in
+        debounce(key: "name", write: { provider in
             try await provider.setName(name)
-        }
+        }, reconcile: { [weak self] provider in
+            guard let self else { return }
+            self.state.name = (try? await provider.name()) ?? self.state.name
+        })
     }
 
-    /// Cancels any pending write for `key` and schedules a new one after `debounceDelay`,
-    /// so rapid successive calls (e.g. a dragged slider) coalesce into a single device write.
-    private func debounce(key: String, operation: @escaping (DeviceProviding) async throws -> Void) {
+    /// Cancels any pending write for `key` and schedules a new one after `debounceDelay`, so
+    /// rapid successive calls (e.g. a dragged slider) coalesce into a single device write.
+    /// On a successful write, `lastError` is cleared and `reconcile` re-reads the single
+    /// field from the device (BLE can clamp/reject a write, so the optimistic value isn't
+    /// trusted as final). A write failure sets `lastError` and skips reconcile; it never
+    /// touches connection `status` — the provider/connection is still live.
+    private func debounce(
+        key: String,
+        write: @escaping (DeviceProviding) async throws -> Void,
+        reconcile: @escaping (DeviceProviding) async -> Void
+    ) {
         debounceTasks[key]?.cancel()
         debounceTasks[key] = Task { [weak self] in
             try? await Task.sleep(nanoseconds: Self.debounceDelay)
             guard !Task.isCancelled, let self, let provider = self.provider else { return }
             do {
-                try await operation(provider)
+                try await write(provider)
+                self.state.lastError = nil
+                await reconcile(provider)
             } catch {
-                self.state.status = .error(self.describe(error))
+                self.state.lastError = self.describe(error)
             }
         }
     }

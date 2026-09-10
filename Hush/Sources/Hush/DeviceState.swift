@@ -28,6 +28,12 @@ public struct DeviceState: Equatable, Sendable {
     public var supportsLiveNoise: Bool
     public var supportsProfiles: Bool
 
+    /// Set when an intent's write or post-write reconcile read fails. This is distinct from
+    /// `status`: the connection is still live, so `status` stays `.connected` — only a
+    /// connection-level failure (in `start()`) sets `status = .error`. Cleared on the next
+    /// successful intent write.
+    public var lastError: String?
+
     public init(
         status: ConnectionStatus = .disconnected,
         battery: Int? = nil,
@@ -41,7 +47,8 @@ public struct DeviceState: Equatable, Sendable {
         autoPause: Bool? = nil,
         autoAnswer: Bool? = nil,
         supportsLiveNoise: Bool = false,
-        supportsProfiles: Bool = false
+        supportsProfiles: Bool = false,
+        lastError: String? = nil
     ) {
         self.status = status
         self.battery = battery
@@ -56,5 +63,6 @@ public struct DeviceState: Equatable, Sendable {
         self.autoAnswer = autoAnswer
         self.supportsLiveNoise = supportsLiveNoise
         self.supportsProfiles = supportsProfiles
+        self.lastError = lastError
     }
 }
