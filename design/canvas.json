@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 980, "h": 800, "title": "Main window — dark" },
+    { "file": "Menubar.dc.html", "x": 1090, "y": 0, "w": 340, "h": 524, "title": "Menu-bar popover" },
+    { "file": "MainLight.dc.html", "x": 0, "y": 940, "w": 980, "h": 800, "title": "Main window — light" }
+  ],
+  "annotations": [
+    { "id": "concept", "x": 0, "y": -132, "w": 520, "text": "Hush — Bose QC Ultra controller\nConcept: \"Quiet instrument\" — a calm, tactile control panel for premium audio. Champagne accent = the aluminium of the headphone; used only for active/live states." }
+  ],
+  "launch": { "view": "canvas" }
+}

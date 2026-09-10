@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="470" viewBox="0 0 820 470" role="img" aria-label="Hush architecture layers">
+  <rect width="820" height="470" rx="16" fill="#12151A"/>
+  <rect x="0.5" y="0.5" width="819" height="469" rx="15.5" fill="none" stroke="#232A34"/>
+
+  <text x="32" y="46" font-family="'Space Grotesk','Helvetica Neue',Arial,sans-serif" font-size="22" font-weight="600" fill="#E8ECF1">Architecture</text>
+  <text x="32" y="70" font-family="'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#8B95A1">Top to bottom: SwiftUI app → shared controller → typed device API → pure codec → Bluetooth transport</text>
+
+  <!-- layers -->
+  <g font-family="'Helvetica Neue',Arial,sans-serif">
+    <!-- UI -->
+    <rect x="32" y="92" width="756" height="62" rx="12" fill="#191D24" stroke="#2A313C"/>
+    <text x="52" y="120" font-size="16" font-weight="600" fill="#E8ECF1">UI  ·  SwiftUI</text>
+    <text x="52" y="140" font-size="12.5" fill="#8B95A1">MenuBar popover · Window (Modes / Sound / Settings) · design tokens · dark + light</text>
+    <text x="768" y="128" text-anchor="end" font-size="12" fill="#E4C39A">Hush</text>
+
+    <!-- Controller -->
+    <rect x="32" y="164" width="756" height="62" rx="12" fill="#191D24" stroke="#2A313C"/>
+    <text x="52" y="192" font-size="16" font-weight="600" fill="#E8ECF1">BoseController  ·  @Observable</text>
+    <text x="52" y="212" font-size="12.5" fill="#8B95A1">single-flight connect · debounced + reconciled writes · lastError · battery poll</text>
+
+    <!-- Device -->
+    <rect x="32" y="236" width="756" height="62" rx="12" fill="#191D24" stroke="#2A313C"/>
+    <text x="52" y="264" font-size="16" font-weight="600" fill="#E8ECF1">BoseDevice + DeviceProfile</text>
+    <text x="52" y="284" font-size="12.5" fill="#8B95A1">typed API (battery, mode, EQ, sidetone…) · per-model config · feature gating</text>
+
+    <!-- Codec -->
+    <rect x="32" y="308" width="756" height="62" rx="12" fill="#191D24" stroke="#2A313C"/>
+    <text x="52" y="336" font-size="16" font-weight="600" fill="#E8ECF1">BMAPCodec  ·  pure Swift, no I/O</text>
+    <text x="52" y="356" font-size="12.5" fill="#8B95A1">frame encode/decode · per-feature parsers &amp; builders · 85 unit tests vs real captures</text>
+    <text x="768" y="344" text-anchor="end" font-size="12" fill="#E4C39A">BoseKit</text>
+
+    <!-- Transport -->
+    <rect x="32" y="380" width="756" height="62" rx="12" fill="#191D24" stroke="#2A313C"/>
+    <text x="52" y="408" font-size="16" font-weight="600" fill="#E8ECF1">BluetoothTransport  ·  IOBluetooth RFCOMM</text>
+    <text x="52" y="428" font-size="12.5" fill="#8B95A1">discovery · SDP + openConnection + channel · run-loop thread · persistent + reconnect</text>
+  </g>
+
+  <!-- champagne accent rail -->
+  <rect x="20" y="92" width="4" height="350" rx="2" fill="#E4C39A" opacity="0.55"/>
+</svg>

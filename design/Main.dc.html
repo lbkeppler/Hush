@@ -1,0 +1,207 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    a { color: #E4C39A; } a:hover { color: #EED4B4; }
+    .num { font-family: 'Space Grotesk', system-ui, sans-serif; font-feature-settings: 'tnum' 1; }
+  </style>
+</helmet>
+
+<div style="width:980px;height:800px;background:#12151A;color:#E8ECF1;font-family:-apple-system,system-ui,'SF Pro Text',sans-serif;display:flex;overflow:hidden">
+
+  <!-- Sidebar -->
+  <aside style="width:226px;flex-shrink:0;background:#141821;border-right:1px solid #222834;display:flex;flex-direction:column;padding:20px 16px;gap:24px">
+
+    <!-- device -->
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div style="display:flex;align-items:center;gap:11px">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E4C39A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.8"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.8"/></svg>
+        <div style="font-family:'Space Grotesk',system-ui;font-weight:600;font-size:15px;letter-spacing:-0.1px">Bose QC Ultra</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:7px">
+        <div style="width:7px;height:7px;border-radius:50%;background:#5BC48A"></div>
+        <div style="font-size:12px;color:#8B95A1">Connected</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px">
+        <div style="display:flex;justify-content:space-between;align-items:baseline">
+          <span style="font-size:11px;color:#8B95A1">Battery</span>
+          <span class="num" style="font-weight:600;font-size:15px;color:#E8ECF1">60%</span>
+        </div>
+        <div style="height:5px;border-radius:3px;background:#232a34;overflow:hidden">
+          <div style="width:60%;height:100%;background:#E4C39A;border-radius:3px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- nav -->
+    <nav style="display:flex;flex-direction:column;gap:3px">
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;background:rgba(228,195,154,0.10);border-left:2px solid #E4C39A;color:#E4C39A">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="2.2"/><path d="M6.5 8a7 7 0 0 0 0 8"/><path d="M17.5 8a7 7 0 0 1 0 8"/><path d="M3.8 5.5a11 11 0 0 0 0 13"/><path d="M20.2 5.5a11 11 0 0 1 0 13"/></svg>
+        <span style="font-size:13.5px;font-weight:600">Noise</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA3AE">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 9h16M4 15h16"/><circle cx="9" cy="9" r="2.2" fill="#141821"/><circle cx="15" cy="15" r="2.2" fill="#141821"/></svg>
+        <span style="font-size:13.5px">Sound</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA3AE">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/></svg>
+        <span style="font-size:13.5px">Modes</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA3AE">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="3.4"/><ellipse cx="12" cy="12" rx="9" ry="4"/><ellipse cx="12" cy="12" rx="4" ry="9"/></svg>
+        <span style="font-size:13.5px">Spatial</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:11px;padding:9px 11px;border-radius:9px;color:#9AA3AE">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 4v2.2M12 17.8V20M4 12h2.2M17.8 12H20M6 6l1.6 1.6M16.4 16.4L18 18M18 6l-1.6 1.6M7.6 16.4L6 18"/></svg>
+        <span style="font-size:13.5px">Settings</span>
+      </div>
+    </nav>
+
+    <div style="flex-grow:1"></div>
+    <div class="num" style="font-size:11px;color:#8B95A1;letter-spacing:0.1px">Firmware 1.6.7+g6ebabd2</div>
+  </aside>
+
+  <!-- Main -->
+  <main style="flex-grow:1;display:flex;flex-direction:column;min-width:0">
+
+    <!-- titlebar -->
+    <div style="height:44px;flex-shrink:0;display:flex;align-items:center;gap:16px;padding:0 22px;border-bottom:1px solid #1b212b">
+      <div style="display:flex;gap:8px">
+        <div style="width:12px;height:12px;border-radius:50%;background:#F1625B"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#F1B62E"></div>
+        <div style="width:12px;height:12px;border-radius:50%;background:#3FC85A"></div>
+      </div>
+      <div style="flex-grow:1"></div>
+      <div style="display:flex;align-items:center;gap:8px;padding:4px 11px;border-radius:20px;border:1px solid #262d38">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6"><rect x="2" y="8" width="17" height="9" rx="2.5"/><rect x="20" y="11" width="2" height="3" rx="1"/><rect x="4" y="10" width="9" height="5" rx="1" fill="#E4C39A" stroke="none"/></svg>
+        <span class="num" style="font-size:12.5px;font-weight:600;color:#E8ECF1">60%</span>
+      </div>
+    </div>
+
+    <!-- content -->
+    <div style="flex-grow:1;padding:24px 26px;display:flex;flex-direction:column;gap:20px;overflow:hidden">
+
+      <!-- header -->
+      <div style="display:flex;align-items:flex-end;gap:14px">
+        <div style="display:flex;flex-direction:column;gap:3px">
+          <h1 style="margin:0;font-family:'Space Grotesk',system-ui;font-weight:600;font-size:27px;letter-spacing:-0.4px">Noise</h1>
+          <div style="font-size:13px;color:#8B95A1">Active noise cancellation and awareness</div>
+        </div>
+        <div style="flex-grow:1"></div>
+        <div style="display:flex;align-items:center;gap:8px;padding:6px 13px;border-radius:20px;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.4)">
+          <div style="width:6px;height:6px;border-radius:50%;background:#E4C39A"></div>
+          <span style="font-size:12.5px;font-weight:600;color:#E4C39A">Quiet mode</span>
+        </div>
+      </div>
+
+      <!-- hero row -->
+      <div style="display:flex;gap:20px">
+
+        <!-- dial card -->
+        <div style="width:300px;flex-shrink:0;background:#191D24;border:1px solid #232a34;border-radius:16px;padding:22px;display:flex;flex-direction:column;align-items:center;gap:10px">
+          <div style="align-self:flex-start;font-size:12px;color:#8B95A1;letter-spacing:0.2px">Noise control</div>
+          <svg width="200" height="200" viewBox="0 0 200 200">
+            <circle cx="100" cy="100" r="84" fill="none" stroke="#262d38" stroke-width="14" stroke-linecap="round" stroke-dasharray="395.8 527.8" transform="rotate(135 100 100)"/>
+            <circle cx="100" cy="100" r="84" fill="none" stroke="#E4C39A" stroke-width="14" stroke-linecap="round" stroke-dasharray="395.8 527.8" transform="rotate(135 100 100)"/>
+            <text x="100" y="96" text-anchor="middle" class="num" font-size="62" font-weight="600" fill="#E8ECF1">0</text>
+            <text x="100" y="124" text-anchor="middle" font-family="-apple-system,system-ui" font-size="13" letter-spacing="1" fill="#8B95A1">MAX ANC</text>
+          </svg>
+          <div style="font-size:11.5px;color:#8B95A1">0 = max ANC&nbsp;&nbsp;·&nbsp;&nbsp;10 = full ambient</div>
+        </div>
+
+        <!-- right column -->
+        <div style="flex-grow:1;display:flex;flex-direction:column;gap:14px;min-width:0">
+
+          <!-- toggles -->
+          <div style="display:flex;gap:14px">
+            <div style="flex-grow:1;background:#191D24;border:1px solid #232a34;border-radius:14px;padding:16px 16px;display:flex;align-items:center;gap:12px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E4C39A" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="2.2"/><path d="M6.5 8a7 7 0 0 0 0 8"/><path d="M17.5 8a7 7 0 0 1 0 8"/></svg>
+              <div style="flex-grow:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Noise cancelling</div><div style="font-size:11.5px;color:#8B95A1">On</div></div>
+              <div style="width:42px;height:24px;border-radius:12px;background:#E4C39A;position:relative;flex-shrink:0"><div style="position:absolute;top:3px;left:21px;width:18px;height:18px;border-radius:50%;background:#12151A"></div></div>
+            </div>
+            <div style="flex-grow:1;background:#191D24;border:1px solid #232a34;border-radius:14px;padding:16px 16px;display:flex;align-items:center;gap:12px">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.7" stroke-linecap="round"><path d="M3 8h10a2.5 2.5 0 1 0-2.5-2.5"/><path d="M3 12h15a2.5 2.5 0 1 1-2.5 2.5"/><path d="M3 16h9"/></svg>
+              <div style="flex-grow:1;min-width:0"><div style="font-size:13.5px;font-weight:600">Wind block</div><div style="font-size:11.5px;color:#8B95A1">Off</div></div>
+              <div style="width:42px;height:24px;border-radius:12px;background:#2A313C;position:relative;flex-shrink:0"><div style="position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#8B95A1"></div></div>
+            </div>
+          </div>
+
+          <!-- modes -->
+          <div style="display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:12px">
+            <div style="display:flex;flex-direction:column;gap:7px;padding:14px;border-radius:13px;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.45)">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#E4C39A" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/></svg>
+              <div style="font-family:'Space Grotesk';font-weight:600;font-size:14px">Quiet</div>
+              <div style="font-size:11.5px;color:#8B95A1">Full noise cancelling</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;padding:14px;border-radius:13px;background:#191D24;border:1px solid #232a34">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6" stroke-linecap="round"><path d="M8 9a4 4 0 0 1 8 0c0 3-3 3.2-3 5.5a2 2 0 0 1-4 0"/><path d="M4.5 6.5a8 8 0 0 0 0 11"/></svg>
+              <div style="font-family:'Space Grotesk';font-weight:600;font-size:14px;color:#E8ECF1">Aware</div>
+              <div style="font-size:11.5px;color:#8B95A1">Full transparency</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;padding:14px;border-radius:13px;background:#191D24;border:1px solid #232a34">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="3.6" ry="9"/></svg>
+              <div style="font-family:'Space Grotesk';font-weight:600;font-size:14px;color:#E8ECF1">Immersion</div>
+              <div style="font-size:11.5px;color:#8B95A1">Spatial · head tracked</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:7px;padding:14px;border-radius:13px;background:#191D24;border:1px solid #232a34">
+              <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9.5h18M8 5v14M16 5v14"/></svg>
+              <div style="font-family:'Space Grotesk';font-weight:600;font-size:14px;color:#E8ECF1">Cinema</div>
+              <div style="font-size:11.5px;color:#8B95A1">Spatial · fixed stage</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EQ card -->
+      <div style="background:#191D24;border:1px solid #232a34;border-radius:16px;padding:18px 20px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <div style="font-family:'Space Grotesk';font-weight:600;font-size:16px">Equalizer</div>
+          <div style="flex-grow:1"></div>
+          <div style="display:flex;gap:7px">
+            <div style="font-size:12px;padding:5px 11px;border-radius:16px;color:#9AA3AE;border:1px solid #2a313c">Flat</div>
+            <div style="font-size:12px;padding:5px 11px;border-radius:16px;color:#9AA3AE;border:1px solid #2a313c">Bass boost</div>
+            <div style="font-size:12px;padding:5px 11px;border-radius:16px;color:#9AA3AE;border:1px solid #2a313c">Podcast</div>
+            <div style="font-size:12px;padding:5px 11px;border-radius:16px;color:#E4C39A;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.45)">Custom</div>
+          </div>
+        </div>
+
+        <div style="display:flex;gap:18px;align-items:stretch">
+          <svg width="600" height="120" viewBox="0 0 600 120" style="flex-grow:1" preserveAspectRatio="none">
+            <line x1="0" y1="60" x2="600" y2="60" stroke="#2a313c" stroke-width="1" stroke-dasharray="4 5"/>
+            <path d="M40,28 C160,16 200,44 300,44 C400,44 470,40 560,40" fill="none" stroke="#E4C39A" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M40,28 C160,16 200,44 300,44 C400,44 470,40 560,40 L560,120 L40,120 Z" fill="#E4C39A" opacity="0.06"/>
+            <circle cx="40" cy="28" r="6" fill="#12151A" stroke="#E4C39A" stroke-width="2.5"/>
+            <circle cx="300" cy="44" r="6" fill="#12151A" stroke="#E4C39A" stroke-width="2.5"/>
+            <circle cx="560" cy="40" r="6" fill="#12151A" stroke="#E4C39A" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div style="display:flex;justify-content:space-between">
+          <div style="display:flex;flex-direction:column;gap:2px;align-items:center;width:33%"><span class="num" style="font-weight:600;font-size:14px;color:#E4C39A">+8</span><span style="font-size:11.5px;color:#8B95A1">Bass</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px;align-items:center;width:33%"><span class="num" style="font-weight:600;font-size:14px;color:#E4C39A">+4</span><span style="font-size:11.5px;color:#8B95A1">Mid</span></div>
+          <div style="display:flex;flex-direction:column;gap:2px;align-items:center;width:33%"><span class="num" style="font-weight:600;font-size:14px;color:#E4C39A">+5</span><span style="font-size:11.5px;color:#8B95A1">Treble</span></div>
+        </div>
+      </div>
+
+      <!-- status strip -->
+      <div style="display:flex;align-items:center;gap:16px;font-size:12px;color:#8B95A1">
+        <div style="display:flex;align-items:center;gap:7px"><div style="width:6px;height:6px;border-radius:50%;background:#5BC48A"></div>Connected</div>
+        <div style="color:#333b46">·</div><div>Sidetone medium</div>
+        <div style="color:#333b46">·</div><div>Multipoint on</div>
+        <div style="color:#333b46">·</div><div>Auto-pause on</div>
+      </div>
+
+    </div>
+  </main>
+</div>
+</x-dc>
+</body>
+</html>

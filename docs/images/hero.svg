@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="300" viewBox="0 0 960 300" role="img" aria-label="Hush — native macOS control for Bose QuietComfort Ultra">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#141821"/>
+      <stop offset="1" stop-color="#0F1218"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="300" rx="18" fill="url(#bg)"/>
+  <rect x="0.5" y="0.5" width="959" height="299" rx="17.5" fill="none" stroke="#232A34"/>
+
+  <!-- headphone glyph -->
+  <g transform="translate(96,150)" fill="none" stroke="#E4C39A" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M-40 8 v-14 a40 40 0 0 1 80 0 v14"/>
+    <rect x="-52" y="6" width="18" height="34" rx="7"/>
+    <rect x="34" y="6" width="18" height="34" rx="7"/>
+  </g>
+
+  <text x="176" y="132" font-family="'Space Grotesk','Helvetica Neue',Arial,sans-serif" font-size="76" font-weight="700" letter-spacing="-1.5" fill="#E8ECF1">Hush</text>
+  <text x="178" y="176" font-family="'Helvetica Neue',Arial,sans-serif" font-size="21" fill="#9AA3AE">Native macOS control for Bose QuietComfort Ultra</text>
+
+  <!-- accent underline -->
+  <rect x="180" y="196" width="120" height="4" rx="2" fill="#E4C39A"/>
+
+  <!-- tag chips -->
+  <g font-family="'Helvetica Neue',Arial,sans-serif" font-size="13" fill="#9AA3AE">
+    <rect x="180" y="224" width="118" height="30" rx="15" fill="none" stroke="#2A313C"/>
+    <text x="199" y="243">Menu-bar app</text>
+    <rect x="308" y="224" width="150" height="30" rx="15" fill="none" stroke="#2A313C"/>
+    <text x="327" y="243">Reverse-engineered</text>
+    <rect x="468" y="224" width="132" height="30" rx="15" fill="rgba(228,195,154,0.10)" stroke="rgba(228,195,154,0.45)"/>
+    <text x="487" y="243" fill="#E4C39A">No app · No cloud</text>
+  </g>
+
+  <!-- mini spectrum accent, right -->
+  <g transform="translate(770,150)" fill="#E4C39A" opacity="0.9">
+    <rect x="0" y="-10" width="8" height="20" rx="4"/>
+    <rect x="16" y="-28" width="8" height="56" rx="4"/>
+    <rect x="32" y="-18" width="8" height="36" rx="4"/>
+    <rect x="48" y="-40" width="8" height="80" rx="4"/>
+    <rect x="64" y="-22" width="8" height="44" rx="4"/>
+    <rect x="80" y="-12" width="8" height="24" rx="4"/>
+  </g>
+</svg>

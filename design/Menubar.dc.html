@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; }
+    * { box-sizing: border-box; }
+    a { color: #E4C39A; } a:hover { color: #EED4B4; }
+    .num { font-family: 'Space Grotesk', system-ui, sans-serif; font-feature-settings: 'tnum' 1; }
+  </style>
+</helmet>
+
+<div style="width:340px;height:524px;background:#12151A;color:#E8ECF1;font-family:-apple-system,system-ui,'SF Pro Text',sans-serif;border:1px solid #232a34;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px;overflow:hidden">
+
+  <!-- header -->
+  <div style="display:flex;align-items:center;gap:10px">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#E4C39A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14v-2a8 8 0 0 1 16 0v2"/><rect x="2.5" y="13.5" width="4.5" height="7" rx="1.8"/><rect x="17" y="13.5" width="4.5" height="7" rx="1.8"/></svg>
+    <div style="flex-grow:1;min-width:0">
+      <div style="font-family:'Space Grotesk';font-weight:600;font-size:14px;letter-spacing:-0.1px">Bose QC Ultra</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px"><div style="width:6px;height:6px;border-radius:50%;background:#5BC48A"></div><span style="font-size:11px;color:#8B95A1">Connected</span></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:7px">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6"><rect x="2" y="8" width="17" height="9" rx="2.5"/><rect x="20" y="11" width="2" height="3" rx="1"/><rect x="4" y="10" width="9" height="5" rx="1" fill="#E4C39A" stroke="none"/></svg>
+      <span class="num" style="font-size:13px;font-weight:600">60%</span>
+    </div>
+  </div>
+
+  <!-- noise control -->
+  <div style="background:#191D24;border:1px solid #232a34;border-radius:14px;padding:15px;display:flex;flex-direction:column;gap:12px">
+    <div style="display:flex;align-items:baseline;gap:8px">
+      <span style="font-size:12px;color:#8B95A1">Noise control</span>
+      <div style="flex-grow:1"></div>
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:14px;color:#E4C39A">Max ANC</span>
+    </div>
+    <!-- slider -->
+    <div style="position:relative;height:26px;display:flex;align-items:center">
+      <div style="width:100%;height:6px;border-radius:3px;background:#262d38"></div>
+      <div style="position:absolute;left:0;width:100%;height:6px;border-radius:3px;background:#E4C39A"></div>
+      <div style="position:absolute;left:calc(100% - 20px);width:20px;height:20px;border-radius:50%;background:#E4C39A;box-shadow:0 1px 4px rgba(0,0,0,0.4)"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;font-size:11px;color:#8B95A1"><span>Ambient</span><span>Max ANC</span></div>
+    <div style="display:flex;gap:9px">
+      <div style="flex-grow:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.4)">
+        <span style="font-size:12px;font-weight:600;color:#E4C39A;flex-grow:1">ANC</span>
+        <div style="width:34px;height:20px;border-radius:10px;background:#E4C39A;position:relative"><div style="position:absolute;top:2.5px;left:16px;width:15px;height:15px;border-radius:50%;background:#12151A"></div></div>
+      </div>
+      <div style="flex-grow:1;display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:10px;background:#1F242C;border:1px solid #2a313c">
+        <span style="font-size:12px;font-weight:600;color:#9AA3AE;flex-grow:1">Wind</span>
+        <div style="width:34px;height:20px;border-radius:10px;background:#2A313C;position:relative"><div style="position:absolute;top:2.5px;left:2.5px;width:15px;height:15px;border-radius:50%;background:#8B95A1"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- modes -->
+  <div style="display:grid;grid-template-columns:repeat(2, minmax(0,1fr));gap:9px">
+    <div style="display:flex;align-items:center;gap:9px;padding:11px;border-radius:11px;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.45)">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#E4C39A" stroke-width="1.6" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.6-7 9-4-1.4-7-4.5-7-9V6z"/></svg>
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:13px">Quiet</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:11px;border-radius:11px;background:#191D24;border:1px solid #232a34">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6" stroke-linecap="round"><path d="M8 9a4 4 0 0 1 8 0c0 3-3 3.2-3 5.5a2 2 0 0 1-4 0"/><path d="M4.5 6.5a8 8 0 0 0 0 11"/></svg>
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:13px;color:#9AA3AE">Aware</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:11px;border-radius:11px;background:#191D24;border:1px solid #232a34">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="3.6" ry="9"/></svg>
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:13px;color:#9AA3AE">Immersion</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:9px;padding:11px;border-radius:11px;background:#191D24;border:1px solid #232a34">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#8B95A1" stroke-width="1.6" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9.5h18M8 5v14M16 5v14"/></svg>
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:13px;color:#9AA3AE">Cinema</span>
+    </div>
+  </div>
+
+  <!-- eq presets -->
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <span style="font-family:'Space Grotesk';font-weight:600;font-size:13px">Sound</span>
+      <svg width="86" height="30" viewBox="0 0 86 30" style="margin-left:auto"><line x1="0" y1="15" x2="86" y2="15" stroke="#2a313c" stroke-width="1" stroke-dasharray="3 4"/><path d="M6,8 C24,4 30,12 43,12 C56,12 66,10 80,11" fill="none" stroke="#E4C39A" stroke-width="2" stroke-linecap="round"/></svg>
+    </div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <div style="font-size:11.5px;padding:5px 10px;border-radius:14px;color:#9AA3AE;border:1px solid #2a313c">Flat</div>
+      <div style="font-size:11.5px;padding:5px 10px;border-radius:14px;color:#9AA3AE;border:1px solid #2a313c">Bass boost</div>
+      <div style="font-size:11.5px;padding:5px 10px;border-radius:14px;color:#9AA3AE;border:1px solid #2a313c">Podcast</div>
+      <div style="font-size:11.5px;padding:5px 10px;border-radius:14px;color:#E4C39A;background:rgba(228,195,154,0.10);border:1px solid rgba(228,195,154,0.45)">Custom</div>
+    </div>
+  </div>
+
+  <div style="flex-grow:1"></div>
+
+  <!-- footer -->
+  <div style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;border-radius:11px;border:1px solid #2a313c;color:#E8ECF1;font-size:13px;font-weight:600">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/></svg>
+    Open Hush
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
