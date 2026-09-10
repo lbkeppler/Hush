@@ -275,3 +275,18 @@ public final class BoseController {
         return error.localizedDescription
     }
 }
+
+extension BoseController {
+    /// Production factory: discovers the device over Bluetooth RFCOMM (probing the usual
+    /// channel candidates) and wraps it in a `LiveDevice`. The target MAC can be overridden
+    /// via the `BOSE_MAC` environment variable; it defaults to the gen-1 QC Ultra
+    /// (`lonestarr` profile) used during Milestone 0 hardware bring-up — see `hushctl`.
+    public static func live() -> BoseController {
+        BoseController {
+            let mac = ProcessInfo.processInfo.environment["BOSE_MAC"] ?? "E4:58:BC:2E:0E:A7"
+            let transport = try await BluetoothTransport.discover(address: mac)
+            let device = BoseDevice(sender: transport, profile: .lonestarr)
+            return await LiveDevice(device: device)
+        }
+    }
+}
