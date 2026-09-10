@@ -22,12 +22,48 @@ Bose only ships its companion app for iOS/Android. If you live on a Mac, you hav
 - 🌗 **Native feel** — light + dark, keyboard focus, calm motion; a calm “quiet instrument” visual language.
 - 🔒 **Local only** — everything happens over your Mac's Bluetooth. Nothing leaves the machine.
 
+## Screenshots
+
+Captured from the running app, connected to a real QC Ultra (gen-1). Images follow your GitHub theme — light and dark variants are in `docs/images/`.
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/popover-dark.png">
+    <img src="docs/images/popover-light.png" alt="Hush menu-bar popover — status, battery, noise-control modes and EQ presets" width="340">
+  </picture>
+</p>
+
+<p align="center"><em>Menu-bar popover: battery, mode switch and EQ presets, one click from the menu bar.</em></p>
+
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/window-now-dark.png">
+    <img src="docs/images/window-now-light.png" alt="Hush main window — Now section with listening modes" width="820">
+  </picture>
+</p>
+
+<p align="center"><em>Main window, “Now”: the current listening mode and the four mode chips.</em></p>
+
+<table align="center">
+  <tr>
+    <td align="center" width="50%">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="docs/images/window-sound-dark.png">
+        <img src="docs/images/window-sound-light.png" alt="Hush — Sound section with the draggable 3-band EQ curve" width="400">
+      </picture>
+      <br><em>Sound: draggable 3-band EQ + presets</em>
+    </td>
+    <td align="center" width="50%">
+      <img src="docs/images/window-settings-light.png" alt="Hush — Settings section: sidetone, auto-pause, auto-answer, device name, multipoint" width="400">
+      <br><em>Settings: sidetone, auto-pause, auto-answer, name</em>
+    </td>
+  </tr>
+</table>
+
 ### Design
 
 The full visual design (menu-bar popover + main window, dark & light) lives as an interactive canvas:
 **[View the design →](https://claude.ai/code/artifact/83e0050e-9df4-4385-ace9-7ce217b62775)**
-
-> _Screenshots of the running app go in `docs/images/`. Drop a capture of the popover and window here and reference them in this section._
 
 ---
 
