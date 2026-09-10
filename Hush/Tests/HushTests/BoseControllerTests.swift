@@ -99,6 +99,13 @@ actor MockDevice: DeviceProviding {
 private struct DiscoveryError: Error {}
 private struct WriteError: Error {}
 
+/// Thread-safe call counter for asserting `makeProvider` isn't invoked more than once across
+/// repeated/concurrent `start()` calls.
+private actor CallCounter {
+    private(set) var count = 0
+    func increment() { count += 1 }
+}
+
 @MainActor
 @Suite("BoseController")
 struct BoseControllerTests {
@@ -273,6 +280,27 @@ struct BoseControllerTests {
         #expect(controller.state.status == .connected)
         #expect(controller.state.lastError == nil)
         #expect(controller.state.sidetone == 5)
+    }
+
+    @Test("start() is idempotent — repeated and concurrent calls create only one provider")
+    func startIsIdempotent() async {
+        let mock = MockDevice(profile: .wolverine)
+        let counter = CallCounter()
+        let controller = BoseController(makeProvider: {
+            await counter.increment()
+            return mock
+        })
+
+        // Two concurrent starts must not race into two separate connections.
+        async let first: Void = controller.start()
+        async let second: Void = controller.start()
+        _ = await (first, second)
+
+        // A subsequent start (already connected) must also be a no-op.
+        await controller.start()
+
+        #expect(controller.state.status == .connected)
+        #expect(await counter.count == 1)
     }
 
     @Test("a provider that throws on start() yields .error")

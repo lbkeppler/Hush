@@ -83,6 +83,10 @@ public final class BoseController {
     private let makeProvider: () async throws -> DeviceProviding
     private var provider: DeviceProviding?
 
+    /// Tracks an in-flight `start()` so repeated/concurrent callers await the same connection
+    /// attempt instead of racing `makeProvider()` into a second competing connection.
+    private var startTask: Task<Void, Never>?
+
     private var batteryPollTask: Task<Void, Never>?
     private var debounceTasks: [String: Task<Void, Never>] = [:]
 
@@ -95,10 +99,26 @@ public final class BoseController {
 
     // MARK: - Lifecycle
 
+    /// Idempotent, single-flight entry point. If already connected, this is a no-op; if a
+    /// start is already in flight, callers await that same attempt instead of racing a second
+    /// `makeProvider()` call (the Bose only allows one SPP channel, so a second concurrent
+    /// connection would kick the first). The actual connect logic lives in `performStart()`.
+    public func start() async {
+        if case .connected = state.status { return }
+        if let startTask {
+            await startTask.value
+            return
+        }
+        let task = Task { await self.performStart() }
+        startTask = task
+        await task.value
+        startTask = nil
+    }
+
     /// Discovers/connects the device (via `makeProvider`), reads capability flags and an
     /// initial snapshot of every supported field, then begins battery polling. Any failure —
     /// discovery or an initial read — moves `state.status` to `.error`.
-    public func start() async {
+    private func performStart() async {
         state.status = .connecting
         do {
             let provider = try await makeProvider()
@@ -289,4 +309,10 @@ extension BoseController {
             return await LiveDevice(device: device)
         }
     }
+
+    /// The single controller instance for the app's lifetime. `HushApp`'s `AppDelegate` starts
+    /// it once at launch; every scene (menu bar, window) reads this same instance so there is
+    /// never more than one connection attempt in flight.
+    @MainActor
+    public static let shared = BoseController.live()
 }
