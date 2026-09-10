@@ -26,8 +26,8 @@ enum Section: String, CaseIterable, Identifiable {
 }
 
 /// The full Hush window: a device-summary + navigation sidebar on the left, and a detail
-/// area on the right that switches per selected `Section`. Only `.now` (modes) is fully
-/// implemented here — `.sound` (Task 6) and `.settings` (Task 7) are placeholders.
+/// area on the right that switches per selected `Section`. `.now` (modes) and `.sound` (EQ)
+/// are fully implemented here — `.settings` (Task 7) is still a placeholder.
 /// "Quiet instrument" styling via `DT` tokens, theme-aware through `colorScheme`.
 public struct MainWindow: View {
     public var controller: BoseController
@@ -174,10 +174,7 @@ public struct MainWindow: View {
         case .now:
             ModesSection(controller: controller)
         case .sound:
-            Text("Sound")
-                .font(DT.body(13))
-                .foregroundStyle(DT.muted(scheme))
-                .padding(32)
+            SoundSection(controller: controller)
         case .settings:
             Text("Settings")
                 .font(DT.body(13))
